@@ -1,4 +1,4 @@
-# CMake Starter
+# CDeps.cmake
 
 [![version](https://img.shields.io/github/v/release/threeal/CDeps.cmake?style=flat-square)](https://github.com/threeal/CDeps.cmake/releases)
 [![license](https://img.shields.io/github/license/threeal/CDeps.cmake?style=flat-square)](./LICENSE)
