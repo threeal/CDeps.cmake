@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(
-  MyMkdir
+  CDeps
   VERSION 0.0.0
-  DESCRIPTION "A starter CMake package for creating directories recursively"
-  HOMEPAGE_URL https://github.com/threeal/cmake-starter
+  DESCRIPTION "Build and install missing dependencies in your CMake project"
+  HOMEPAGE_URL https://github.com/threeal/CDeps.cmake
   LANGUAGES NONE
 )
 
