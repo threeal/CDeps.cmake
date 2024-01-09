@@ -17,7 +17,9 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR AND BUILD_TESTING)
 
   add_test(
     NAME BuildProjectTest
-    COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/test/BuildProjectTest.cmake
+    COMMAND cmake
+      -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/BuildProjectTest.cmake
   )
 endif()
 
