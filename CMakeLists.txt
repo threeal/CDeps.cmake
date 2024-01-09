@@ -24,6 +24,8 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR AND BUILD_TESTING)
 endif()
 
 install(
-  FILES cmake/MkdirRecursive.cmake
+  FILES
+    cmake/MkdirRecursive.cmake
+    cmake/CDeps.cmake
   DESTINATION lib/cmake
 )
