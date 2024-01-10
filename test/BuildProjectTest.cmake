@@ -5,7 +5,9 @@ endif()
 
 message(STATUS "Configuring project")
 execute_process(
-  COMMAND cmake ${CMAKE_CURRENT_LIST_DIR}/project -B ${CMAKE_CURRENT_LIST_DIR}/project/build
+  COMMAND cmake ${CMAKE_CURRENT_LIST_DIR}/project
+    -B ${CMAKE_CURRENT_LIST_DIR}/project/build
+    -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
   RESULT_VARIABLE RES
 )
 if(NOT ${RES} EQUAL 0)

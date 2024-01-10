@@ -10,18 +10,18 @@ project(
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-include(MkdirRecursive)
-
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR AND BUILD_TESTING)
   enable_testing()
 
   add_test(
     NAME BuildProjectTest
-    COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/test/BuildProjectTest.cmake
+    COMMAND cmake
+      -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/BuildProjectTest.cmake
   )
 endif()
 
 install(
-  FILES cmake/MkdirRecursive.cmake
+  FILES cmake/CDeps.cmake
   DESTINATION lib/cmake
 )
