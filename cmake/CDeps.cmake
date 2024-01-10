@@ -35,7 +35,7 @@ function(cdeps_install_package)
   if(NOT EXISTS ${BUILD_DIR})
     message(STATUS "CDeps: Configuring ${ARG_NAME}")
     execute_process(
-      COMMAND ${CMAKE_COMMAND} ${SOURCE_DIR} -B ${BUILD_DIR} -D FMT_MASTER_PROJECT=OFF
+      COMMAND ${CMAKE_COMMAND} ${SOURCE_DIR} -B ${BUILD_DIR}
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
