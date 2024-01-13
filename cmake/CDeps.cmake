@@ -3,8 +3,9 @@
 #   - NAME: The package name.
 #   - GIT_URL: The Git URL of the package.
 #   - GIT_TAG: The Git tag of the package.
+#   - OPTIONS: The options to be passed during the build configuration of the package.
 function(cdeps_install_package)
-  cmake_parse_arguments(ARG "" "NAME;GIT_URL;GIT_TAG" "" ${ARGN})
+  cmake_parse_arguments(ARG "" "NAME;GIT_URL;GIT_TAG" "OPTIONS" ${ARGN})
 
   # Set the default CDEPS_ROOT directory if not provided.
   if(NOT CDEPS_ROOT)
@@ -34,8 +35,11 @@ function(cdeps_install_package)
   set(BUILD_DIR ${CDEPS_ROOT}/${ARG_NAME}-build)
   if(NOT EXISTS ${BUILD_DIR})
     message(STATUS "CDeps: Configuring ${ARG_NAME}")
+    foreach(OPTION ${ARG_OPTIONS})
+      list(APPEND CONFIGURE_ARGS -D ${OPTION})
+    endforeach()
     execute_process(
-      COMMAND ${CMAKE_COMMAND} ${SOURCE_DIR} -B ${BUILD_DIR} -D FMT_MASTER_PROJECT=OFF
+      COMMAND ${CMAKE_COMMAND} -B ${BUILD_DIR} ${CONFIGURE_ARGS} ${SOURCE_DIR}
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )

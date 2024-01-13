@@ -8,6 +8,7 @@ cdeps_install_package(
   NAME FMT
   GIT_URL https://github.com/fmtlib/fmt
   GIT_TAG 10.2.1
+  OPTIONS FMT_MASTER_PROJECT=OFF
 )
 
 find_package(FMT REQUIRED CONFIG)
