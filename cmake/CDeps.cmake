@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 # Function to download, build, and install missing packages.
 # Arguments:
 #   - NAME: The package name.
