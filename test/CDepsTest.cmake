@@ -6,27 +6,24 @@ endif()
 set(TEST_COUNT 0)
 
 function(reconfigure_project)
-  if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/project/build)
-    message(STATUS "Removing build directory")
-    file(REMOVE_RECURSE ${CMAKE_CURRENT_LIST_DIR}/project/build)
-  endif()
-
-  message(STATUS "Configuring project")
+  message(STATUS "Reconfiguring project")
   execute_process(
-    COMMAND cmake ${CMAKE_CURRENT_LIST_DIR}/project
+    COMMAND ${CMAKE_COMMAND}
       -B ${CMAKE_CURRENT_LIST_DIR}/project/build
       -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+      --fresh
+      ${CMAKE_CURRENT_LIST_DIR}/project
     RESULT_VARIABLE RES
   )
   if(NOT RES EQUAL 0)
-    message(FATAL_ERROR "Failed to configure project")
+    message(FATAL_ERROR "Failed to reconfigure project")
   endif()
 endfunction()
 
 function(build_project)
   message(STATUS "Building project")
   execute_process(
-    COMMAND cmake --build ${CMAKE_CURRENT_LIST_DIR}/project/build
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_LIST_DIR}/project/build
     RESULT_VARIABLE RES
   )
   if(NOT RES EQUAL 0)
