@@ -13,13 +13,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   if(BUILD_TESTING)
     enable_testing()
-
-    add_test(
-      NAME BuildProjectTest
-      COMMAND cmake
-        -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test/BuildProjectTest.cmake
-    )
+    add_subdirectory(test)
   endif()
 
   install(
