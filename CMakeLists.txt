@@ -18,6 +18,6 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 
   install(
     FILES cmake/CDeps.cmake
-    DESTINATION lib/cmake
+    DESTINATION lib/cmake/CDeps
   )
 endif()
