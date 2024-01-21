@@ -11,6 +11,12 @@ function(add_cmake_test FILE)
 endfunction()
 
 add_cmake_test(
+  CDepsParseArgsTest.cmake
+  "Parse arguments"
+  "Parse empty arguments"
+)
+
+add_cmake_test(
   CDepsTest.cmake
   "Install missing dependencies"
 )
