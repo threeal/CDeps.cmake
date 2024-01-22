@@ -16,8 +16,17 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     add_subdirectory(test)
   endif()
 
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+    CDepsConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion
+  )
+
   install(
-    FILES cmake/CDeps.cmake
-    DESTINATION lib/cmake
+    FILES
+      cmake/CDeps.cmake
+      cmake/CDepsConfig.cmake
+      ${CMAKE_CURRENT_BINARY_DIR}/CDepsConfigVersion.cmake
+    DESTINATION lib/cmake/CDeps
   )
 endif()
