@@ -1,10 +1,3 @@
-# Matches everything if not defined
-if(NOT TEST_MATCHES)
-  set(TEST_MATCHES ".*")
-endif()
-
-set(TEST_COUNT 0)
-
 function(reconfigure_project)
   message(STATUS "Reconfiguring project")
   execute_process(
@@ -42,13 +35,16 @@ function(run_project)
   endif()
 endfunction()
 
-if("Install missing dependencies" MATCHES ${TEST_MATCHES})
-  math(EXPR TEST_COUNT "${TEST_COUNT} + 1")
+function(test_install_missing_dependencies)
   reconfigure_project()
   build_project()
   run_project()
+endfunction()
+
+if(NOT DEFINED TEST_COMMAND)
+  message(FATAL_ERROR "The 'TEST_COMMAND' variable should be defined")
+elseif(NOT COMMAND test_${TEST_COMMAND})
+  message(FATAL_ERROR "Unable to find a command named 'test_${TEST_COMMAND}'")
 endif()
 
-if(TEST_COUNT LESS_EQUAL 0)
-  message(FATAL_ERROR "Nothing to test with: ${TEST_MATCHES}")
-endif()
+cmake_language(CALL test_${TEST_COMMAND})
