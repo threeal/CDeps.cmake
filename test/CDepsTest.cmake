@@ -1,7 +1,7 @@
 function(reconfigure_project)
   message(STATUS "Reconfiguring project")
   execute_process(
-    COMMAND ${CMAKE_COMMAND}
+    COMMAND "${CMAKE_COMMAND}"
       -B ${CMAKE_CURRENT_LIST_DIR}/project/build
       -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
       --fresh
@@ -16,7 +16,7 @@ endfunction()
 function(build_project)
   message(STATUS "Building project")
   execute_process(
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_LIST_DIR}/project/build
+    COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_CURRENT_LIST_DIR}/project/build
     RESULT_VARIABLE RES
   )
   if(NOT RES EQUAL 0)
