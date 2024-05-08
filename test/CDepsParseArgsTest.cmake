@@ -12,7 +12,7 @@ function(expect_undefined VAR)
   endif()
 endfunction()
 
-function(test_parse_arguments)
+function("Parse arguments")
   _cdeps_parse_arguments(
     NAME Foo
     GIT_URL https://github.com/foo/foo
@@ -28,7 +28,7 @@ function(test_parse_arguments)
   expect(ARG_OPTIONS "BUILD_TESTING=OFF;BUILD_DOCS=OFF")
 endfunction()
 
-function(test_parse_empty_arguments)
+function("Parse empty arguments")
   _cdeps_parse_arguments()
 
   expect_undefined(ARG_NAME)
@@ -39,8 +39,8 @@ endfunction()
 
 if(NOT DEFINED TEST_COMMAND)
   message(FATAL_ERROR "The 'TEST_COMMAND' variable should be defined")
-elseif(NOT COMMAND test_${TEST_COMMAND})
-  message(FATAL_ERROR "Unable to find a command named 'test_${TEST_COMMAND}'")
+elseif(NOT COMMAND "${TEST_COMMAND}")
+  message(FATAL_ERROR "Unable to find a command named '${TEST_COMMAND}'")
 endif()
 
-cmake_language(CALL test_${TEST_COMMAND})
+cmake_language(CALL "${TEST_COMMAND}")
