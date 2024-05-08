@@ -37,10 +37,4 @@ function("Parse empty arguments")
   expect_undefined(ARG_OPTIONS)
 endfunction()
 
-if(NOT DEFINED TEST_COMMAND)
-  message(FATAL_ERROR "The 'TEST_COMMAND' variable should be defined")
-elseif(NOT COMMAND "${TEST_COMMAND}")
-  message(FATAL_ERROR "Unable to find a command named '${TEST_COMMAND}'")
-endif()
-
 cmake_language(CALL "${TEST_COMMAND}")
