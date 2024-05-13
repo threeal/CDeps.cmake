@@ -35,16 +35,10 @@ function(run_project)
   endif()
 endfunction()
 
-function(test_install_missing_dependencies)
+function("Install missing dependencies")
   reconfigure_project()
   build_project()
   run_project()
 endfunction()
 
-if(NOT DEFINED TEST_COMMAND)
-  message(FATAL_ERROR "The 'TEST_COMMAND' variable should be defined")
-elseif(NOT COMMAND test_${TEST_COMMAND})
-  message(FATAL_ERROR "Unable to find a command named 'test_${TEST_COMMAND}'")
-endif()
-
-cmake_language(CALL test_${TEST_COMMAND})
+cmake_language(CALL "${TEST_COMMAND}")
