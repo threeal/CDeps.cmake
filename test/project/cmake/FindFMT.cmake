@@ -1,6 +1,6 @@
-find_package(FMT QUIET CONFIG)
+find_package(FMT QUIET CONFIG NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
 if(FMT_FOUND)
-  return()
+  message(FATAL_ERROR "should not use the FMT library from the system")
 endif()
 
 include(CDeps)
@@ -11,4 +11,4 @@ cdeps_install_package(
   OPTIONS FMT_MASTER_PROJECT=OFF
 )
 
-find_package(FMT REQUIRED CONFIG)
+find_package(FMT REQUIRED CONFIG NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
