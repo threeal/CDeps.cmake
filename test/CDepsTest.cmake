@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+
 function(reconfigure_project)
   message(STATUS "Reconfiguring project")
   execute_process(
