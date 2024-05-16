@@ -21,3 +21,6 @@ find_package(FMT REQUIRED NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main fmt::fmt)
+
+add_custom_target(run_main ALL COMMAND "$<TARGET_FILE:main>")
+add_dependencies(run_main main)
