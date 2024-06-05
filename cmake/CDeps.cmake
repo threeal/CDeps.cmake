@@ -10,7 +10,7 @@ include_guard(GLOBAL)
 #   - GIT_TAG: The Git tag of the package.
 #   - OPTIONS: The options to be passed during the build configuration of the package.
 function(cdeps_install_package)
-  cmake_parse_arguments(ARG "" "NAME;GIT_URL;GIT_TAG" "OPTIONS" ${ARGN})
+  cmake_parse_arguments(PARSE_ARGV 0 ARG "" "NAME;GIT_URL;GIT_TAG" OPTIONS)
 
   # Set the default CDEPS_ROOT directory if not provided.
   if(NOT CDEPS_ROOT)
