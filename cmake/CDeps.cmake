@@ -4,13 +4,16 @@
 include_guard(GLOBAL)
 
 # Function to download, build, and install missing packages.
+#
+# Arguments:
+#   - GIT_URL: The Git URL of the package.
+#
 # Arguments:
 #   - NAME: The package name.
-#   - GIT_URL: The Git URL of the package.
 #   - GIT_TAG: The Git tag of the package.
 #   - OPTIONS: The options to be passed during the build configuration of the package.
-function(cdeps_install_package)
-  cmake_parse_arguments(PARSE_ARGV 0 ARG "" "NAME;GIT_URL;GIT_TAG" OPTIONS)
+function(cdeps_install_package GIT_URL)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME;GIT_TAG" OPTIONS)
 
   # Set the default CDEPS_ROOT directory if not provided.
   if(NOT CDEPS_ROOT)
@@ -25,9 +28,9 @@ function(cdeps_install_package)
       message(FATAL_ERROR "CDeps: Git is required to download packages")
     endif()
 
-    message(STATUS "CDeps: Downloading ${ARG_NAME} from ${ARG_GIT_URL}#${ARG_GIT_TAG}")
+    message(STATUS "CDeps: Downloading ${ARG_NAME} from ${GIT_URL}#${ARG_GIT_TAG}")
     execute_process(
-      COMMAND git clone -b "${ARG_GIT_TAG}" "${ARG_GIT_URL}" "${SOURCE_DIR}"
+      COMMAND git clone -b "${ARG_GIT_TAG}" "${GIT_URL}" "${SOURCE_DIR}"
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
