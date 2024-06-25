@@ -17,7 +17,6 @@ section("generate sample project")
     "endif()\n"
     "\n"
     "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
-    "include(CDeps)\n"
     "\n"
     "cdeps_install_package(\n"
     "  https://github.com/fmtlib/fmt\n"
