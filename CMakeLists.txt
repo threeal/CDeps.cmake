@@ -11,7 +11,7 @@ project(
 option(CDEPS_ENABLE_TESTS "Enable test targets.")
 option(CDEPS_ENABLE_INSTALL "Enable install targets." ${PROJECT_IS_TOP_LEVEL})
 
-list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(cmake/CDeps.cmake)
 
 if(CDEPS_ENABLE_TESTS)
   enable_testing()
