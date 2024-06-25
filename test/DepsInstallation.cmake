@@ -1,13 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-file(
-  DOWNLOAD https://github.com/threeal/assertion-cmake/releases/download/v0.3.0/Assertion.cmake
-    ${CMAKE_BINARY_DIR}/Assertion.cmake
-  EXPECTED_MD5 851f49c10934d715df5d0b59c8b8c72a
-)
-include(${CMAKE_BINARY_DIR}/Assertion.cmake)
+include(Assertion.cmake)
 
-function("Install missing dependencies")
+section("generate sample project")
   file(MAKE_DIRECTORY project)
 
   file(
@@ -16,14 +11,12 @@ function("Install missing dependencies")
     "\n"
     "project(Poject LANGUAGES CXX)\n"
     "\n"
-    "list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)\n"
-    "\n"
     "find_package(FMT QUIET NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)\n"
     "if(FMT_FOUND)\n"
     "  message(FATAL_ERROR \"should not use the FMT library from the system\")\n"
     "endif()\n"
     "\n"
-    "include(CDeps)\n"
+    "include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)\n"
     "cdeps_install_package(\n"
     "  NAME FMT\n"
     "  GIT_URL https://github.com/fmtlib/fmt\n"
@@ -47,16 +40,12 @@ function("Install missing dependencies")
     "  fmt::print(\"Hello world!\\n\");\n"
     "  return 0;\n"
     "}\n")
+endsection()
 
-  assert_execute_process(
-    "${CMAKE_COMMAND}"
-      -B project/build
-      -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
-      --fresh
-      project)
+section("reconfigure sample project")
+  assert_execute_process("${CMAKE_COMMAND}" -B project/build --fresh project)
+endsection()
 
-  assert_execute_process(
-    "${CMAKE_COMMAND}" --build project/build)
-endfunction()
-
-cmake_language(CALL "${TEST_COMMAND}")
+section("build sample project")
+  assert_execute_process("${CMAKE_COMMAND}" --build project/build)
+endsection()

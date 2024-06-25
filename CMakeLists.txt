@@ -15,7 +15,16 @@ list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 if(CDEPS_ENABLE_TESTS)
   enable_testing()
-  add_subdirectory(test)
+
+  file(
+    DOWNLOAD https://github.com/threeal/assertion-cmake/releases/download/v0.3.0/Assertion.cmake
+      ${CMAKE_BINARY_DIR}/Assertion.cmake
+    EXPECTED_MD5 851f49c10934d715df5d0b59c8b8c72a)
+
+  add_test(
+    NAME "dependencies installation"
+    COMMAND "${CMAKE_COMMAND}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/DepsInstallation.cmake)
 endif()
 
 if(CDEPS_ENABLE_INSTALL)
