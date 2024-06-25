@@ -7,7 +7,7 @@ file(
 )
 include(${CMAKE_BINARY_DIR}/Assertion.cmake)
 
-function("Install missing dependencies")
+section("generate sample project")
   file(MAKE_DIRECTORY project)
 
   file(
@@ -47,16 +47,18 @@ function("Install missing dependencies")
     "  fmt::print(\"Hello world!\\n\");\n"
     "  return 0;\n"
     "}\n")
+endsection()
 
+section("reconfigure sample project")
   assert_execute_process(
     "${CMAKE_COMMAND}"
       -B project/build
       -D CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
       --fresh
       project)
+endsection()
 
+section("build sample project")
   assert_execute_process(
     "${CMAKE_COMMAND}" --build project/build)
-endfunction()
-
-cmake_language(CALL "${TEST_COMMAND}")
+endsection()
