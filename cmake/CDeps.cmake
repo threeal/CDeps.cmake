@@ -3,16 +3,18 @@
 
 include_guard(GLOBAL)
 
-# Downloads, builds, and installs an external package.
+# Downloads the source code of an external package.
 #
-# cdeps_install_package(
-#   <git_url> [NAME <name>] [GIT_TAG <tag>] [OPTIONS <options>...])
+# cdeps_download_package(<git_url> [NAME <name>] [GIT_TAG <tag>])
 #
-# This function downloads an external package named `<name>` from the given
-# `<git_url>` with a specific `<tag>`, builds it with `<options>`, and installs
-# it so that it is available in the current project.
-function(cdeps_install_package GIT_URL)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME;GIT_TAG" OPTIONS)
+# This function downloads the source code of an external package using Git.
+# It downloads the source code from the given `<git_url>` with a specific
+# `<tag>` and saves it as the `<name>` package.
+#
+# This function outputs the `<name>_SOURCE_DIR` variable, which contains the
+# path of the downloaded source code of the external package.
+function(cdeps_download_package GIT_URL)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME;GIT_TAG" "")
 
   # Set the default CDEPS_ROOT directory if not provided.
   if(NOT CDEPS_ROOT)
@@ -38,6 +40,29 @@ function(cdeps_install_package GIT_URL)
     endif()
   endif()
 
+  set(${ARG_NAME}_SOURCE_DIR "${SOURCE_DIR}" PARENT_SCOPE)
+endfunction()
+
+# Installs an external package after building it from downloaded source code.
+#
+# cdeps_install_package(
+#   <git_url> [NAME <name>] [GIT_TAG <tag>] [OPTIONS <options>...])
+#
+# This function installs an external package named `<name>` after building it
+# with `<options>` from source code downloaded from the given `<git_url>` with
+# a specific `<tag>`.
+#
+# See also the documentation of the `cdeps_download_package` function.
+function(cdeps_install_package GIT_URL)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME" OPTIONS)
+
+  cdeps_download_package("${GIT_URL}" NAME "${ARG_NAME}" ${ARG_UNPARSED_ARGUMENTS})
+
+  # Set the default CDEPS_ROOT directory if not provided.
+  if(NOT CDEPS_ROOT)
+    set(CDEPS_ROOT ${CMAKE_SOURCE_DIR}/.cdeps)
+  endif()
+
   # Check if the build directory exists; if not, configure and build the package.
   set(BUILD_DIR ${CDEPS_ROOT}/${ARG_NAME}-build)
   if(NOT EXISTS "${BUILD_DIR}")
@@ -46,7 +71,7 @@ function(cdeps_install_package GIT_URL)
       list(APPEND CONFIGURE_ARGS -D "${OPTION}")
     endforeach()
     execute_process(
-      COMMAND "${CMAKE_COMMAND}" -B "${BUILD_DIR}" ${CONFIGURE_ARGS} "${SOURCE_DIR}"
+      COMMAND "${CMAKE_COMMAND}" -B "${BUILD_DIR}" ${CONFIGURE_ARGS} "${${ARG_NAME}_SOURCE_DIR}"
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
