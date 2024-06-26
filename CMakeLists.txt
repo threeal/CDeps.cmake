@@ -22,6 +22,11 @@ if(CDEPS_ENABLE_TESTS)
     EXPECTED_MD5 851f49c10934d715df5d0b59c8b8c72a)
 
   add_test(
+    NAME "package URL resolve"
+    COMMAND "${CMAKE_COMMAND}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageUrlResolve.cmake)
+
+  add_test(
     NAME "package download"
     COMMAND "${CMAKE_COMMAND}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageDownload.cmake)

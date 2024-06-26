@@ -3,6 +3,20 @@
 
 include_guard(GLOBAL)
 
+# Resolves the given package URL to a valid URL.
+#
+# cdeps_resolve_package_url(<url> <output_url>)
+#
+# This function resolves the given `<url>` to a valid URL and outputs it to the
+# `<output_url>` variable.
+function(cdeps_resolve_package_url URL OUTPUT_URL)
+  if(URL MATCHES ".*://")
+    set("${OUTPUT_URL}" "${URL}" PARENT_SCOPE)
+  else()
+    set("${OUTPUT_URL}" https://${URL} PARENT_SCOPE)
+  endif()
+endfunction()
+
 # Downloads the source code of an external package.
 #
 # cdeps_download_package(<url> [NAME <name>] [GIT_TAG <tag>])
@@ -29,9 +43,11 @@ function(cdeps_download_package URL)
       message(FATAL_ERROR "CDeps: Git is required to download packages")
     endif()
 
-    message(STATUS "CDeps: Downloading ${ARG_NAME} from ${URL}#${ARG_GIT_TAG}")
+    cdeps_resolve_package_url("${URL}" GIT_URL)
+
+    message(STATUS "CDeps: Downloading ${ARG_NAME} from ${GIT_URL}#${ARG_GIT_TAG}")
     execute_process(
-      COMMAND git clone -b "${ARG_GIT_TAG}" "https://${URL}" "${SOURCE_DIR}"
+      COMMAND git clone -b "${ARG_GIT_TAG}" "${GIT_URL}" "${SOURCE_DIR}"
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
