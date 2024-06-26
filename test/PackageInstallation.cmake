@@ -1,0 +1,72 @@
+cmake_minimum_required(VERSION 3.5)
+
+include(Assertion.cmake)
+
+section("it should fail to install an external package")
+  file(REMOVE_RECURSE project)
+  file(MAKE_DIRECTORY project)
+
+  # TODO: Currently, a Git tag is always required.
+  file(
+    WRITE project/CMakeLists.txt
+    "cmake_minimum_required(VERSION 3.5)\n"
+    "project(Poject LANGUAGES CXX)\n"
+    "\n"
+    "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
+    "cdeps_install_package(\n"
+    "  https://github.com/threeal/cpp-starter\n"
+    "  NAME cpp-starter\n"
+    "  GIT_TAG main\n"
+    "  OPTIONS CMAKE_SKIP_INSTALL_RULES=ON)\n")
+
+  assert_execute_process(
+    COMMAND "${CMAKE_COMMAND}" -B project/build project
+    ERROR "CDeps: Failed to install cpp-starter:")
+endsection()
+
+section("it should install an external package")
+  file(REMOVE_RECURSE project)
+  file(MAKE_DIRECTORY project)
+
+  # TODO: Currently, a Git tag is always required.
+  file(
+    WRITE project/CMakeLists.txt
+    "cmake_minimum_required(VERSION 3.5)\n"
+    "project(Poject LANGUAGES CXX)\n"
+    "\n"
+    "include(../Assertion.cmake)\n"
+    "\n"
+    "find_package(MyFibonacci QUIET)\n"
+    "assert(NOT MyFibonacci_FOUND)\n"
+    "\n"
+    "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
+    "cdeps_install_package(\n"
+    "  https://github.com/threeal/cpp-starter\n"
+    "  NAME cpp-starter\n"
+    "  GIT_TAG main)\n"
+    "\n"
+    "find_package(MyFibonacci REQUIRED)\n"
+    "\n"
+    "add_executable(main main.cpp)\n"
+    "target_link_libraries(main my_fibonacci::sequence)\n"
+    "\n"
+    "add_custom_target(run_main ALL COMMAND \"$<TARGET_FILE:main>\")\n"
+    "add_dependencies(run_main main)\n")
+
+  file(
+    WRITE project/main.cpp
+    "#include <my_fibonacci/sequence.hpp>\n"
+    "#include <iostream>\n"
+    "\n"
+    "int main() {\n"
+    "  const auto sequence = my_fibonacci::fibonacci_sequence(5);\n"
+    "  for (auto val : sequence) {\n"
+    "    std::cout << val << \" \";\n"
+    "  }\n"
+    "  std::cout << std::endl;\n"
+    "  return 0;\n"
+    "}\n")
+
+  assert_execute_process("${CMAKE_COMMAND}" -B project/build project)
+  assert_execute_process("${CMAKE_COMMAND}" --build project/build)
+endsection()
