@@ -27,6 +27,11 @@ if(CDEPS_ENABLE_TESTS)
       -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageDownload.cmake)
 
   add_test(
+    NAME "package build"
+    COMMAND "${CMAKE_COMMAND}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageBuild.cmake)
+
+  add_test(
     NAME "package installation"
     COMMAND "${CMAKE_COMMAND}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageInstallation.cmake)
