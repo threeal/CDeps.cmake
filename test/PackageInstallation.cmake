@@ -14,7 +14,7 @@ section("it should fail to install an external package")
     "\n"
     "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
     "cdeps_install_package(\n"
-    "  https://github.com/threeal/cpp-starter\n"
+    "  github.com/threeal/cpp-starter\n"
     "  NAME cpp-starter\n"
     "  GIT_TAG main\n"
     "  OPTIONS CMAKE_SKIP_INSTALL_RULES=ON)\n")
@@ -41,7 +41,7 @@ section("it should install an external package")
     "\n"
     "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
     "cdeps_install_package(\n"
-    "  https://github.com/threeal/cpp-starter\n"
+    "  github.com/threeal/cpp-starter\n"
     "  NAME cpp-starter\n"
     "  GIT_TAG main)\n"
     "\n"
