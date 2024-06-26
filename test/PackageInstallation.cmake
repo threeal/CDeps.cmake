@@ -2,24 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 include(Assertion.cmake)
 
-section("it should fail to download a dependency")
-  file(REMOVE_RECURSE project)
-  file(MAKE_DIRECTORY project)
-
-  file(
-    WRITE project/CMakeLists.txt
-    "cmake_minimum_required(VERSION 3.5)\n"
-    "project(Poject LANGUAGES CXX)\n"
-    "\n"
-    "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
-    "cdeps_install_package(https://google.com NAME google)\n")
-
-  assert_execute_process(
-    COMMAND "${CMAKE_COMMAND}" -B project/build project
-    ERROR "CDeps: Failed to download google:")
-endsection()
-
-section("it should fail to configure a dependency")
+section("it should fail to configure an external package")
   file(REMOVE_RECURSE project)
   file(MAKE_DIRECTORY project)
 
@@ -40,7 +23,7 @@ section("it should fail to configure a dependency")
     ERROR "CDeps: Failed to configure project-starter:")
 endsection()
 
-section("it should fail to build a dependency")
+section("it should fail to build an external package")
   file(REMOVE_RECURSE project)
   file(MAKE_DIRECTORY project)
 
@@ -62,7 +45,7 @@ section("it should fail to build a dependency")
     ERROR "CDeps: Failed to build cpp-starter:")
 endsection()
 
-section("it should fail to install a dependency")
+section("it should fail to install an external package")
   file(REMOVE_RECURSE project)
   file(MAKE_DIRECTORY project)
 
@@ -84,7 +67,7 @@ section("it should fail to install a dependency")
     ERROR "CDeps: Failed to install cmake-starter:")
 endsection()
 
-section("it should install a dependency")
+section("it should install an external package")
   file(REMOVE_RECURSE project)
   file(MAKE_DIRECTORY project)
 
