@@ -12,7 +12,7 @@ section("it should fail to download the source code of an external package")
     "project(Poject LANGUAGES CXX)\n"
     "\n"
     "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
-    "cdeps_download_package(https://google.com NAME google)\n")
+    "cdeps_download_package(google.com NAME google)\n")
 
   assert_execute_process(
     COMMAND "${CMAKE_COMMAND}" -B project/build project
@@ -31,7 +31,7 @@ section("it should download the source code of an external package")
     "\n"
     "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
     "cdeps_download_package(\n"
-    "  https://github.com/threeal/project-starter\n"
+    "  github.com/threeal/project-starter\n"
     "  NAME project-starter\n"
     "  GIT_TAG main)\n"
     "\n"
