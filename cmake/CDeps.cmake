@@ -3,15 +3,14 @@
 
 include_guard(GLOBAL)
 
-# Function to download, build, and install missing packages.
+# Downloads, builds, and installs an external package.
 #
-# Arguments:
-#   - GIT_URL: The Git URL of the package.
+# cdeps_install_package(
+#   <git_url> [NAME <name>] [GIT_TAG <tag>] [OPTIONS <options>...])
 #
-# Arguments:
-#   - NAME: The package name.
-#   - GIT_TAG: The Git tag of the package.
-#   - OPTIONS: The options to be passed during the build configuration of the package.
+# This function downloads an external package named `<name>` from the given
+# `<git_url>` with a specific `<tag>`, builds it with `<options>`, and installs
+# it so that it is available in the current project.
 function(cdeps_install_package GIT_URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME;GIT_TAG" OPTIONS)
 
