@@ -3,6 +3,24 @@
 
 include_guard(GLOBAL)
 
+# Retrieves the path of a package directory.
+#
+# cdeps_get_package_dir(<name> <output_dir>)
+#
+# This function retrieves the directory path of a package named `<name>` and
+# stores it in the `<output_dir>` variable.
+#
+# If the `CDEPS_ROOT` variable is defined, it will locate the package directory
+# under that variable. Otherwise, it will locate the package directory under the
+# `.cdeps` directory of the project's source directory.
+function(cdeps_get_package_dir NAME OUTPUT_DIR)
+  if(DEFINED CDEPS_ROOT)
+    set("${OUTPUT_DIR}" ${CDEPS_ROOT}/${NAME} PARENT_SCOPE)
+  else()
+    set("${OUTPUT_DIR}" ${CMAKE_SOURCE_DIR}/.cdeps/${NAME} PARENT_SCOPE)
+  endif()
+endfunction()
+
 # Resolves the given package URL to a valid URL.
 #
 # cdeps_resolve_package_url(<url> <output_url>)
@@ -29,15 +47,10 @@ endfunction()
 # path of the downloaded source code of the external package.
 function(cdeps_download_package URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME;GIT_TAG" "")
-
-  # Set the default CDEPS_ROOT directory if not provided.
-  if(NOT CDEPS_ROOT)
-    set(CDEPS_ROOT ${CMAKE_SOURCE_DIR}/.cdeps)
-  endif()
+  cdeps_get_package_dir("${ARG_NAME}" PACKAGE_DIR)
 
   # Check if the source directory exists; if not, download the package using Git.
-  set(SOURCE_DIR ${CDEPS_ROOT}/${ARG_NAME}-src)
-  if(NOT EXISTS "${SOURCE_DIR}")
+  if(NOT EXISTS ${PACKAGE_DIR}-src)
     find_program(GIT_PROGRAM git)
     if("${GIT_PROGRAM}" STREQUAL GIT_PROGRAM-NOTFOUND)
       message(FATAL_ERROR "CDeps: Git is required to download packages")
@@ -47,7 +60,7 @@ function(cdeps_download_package URL)
 
     message(STATUS "CDeps: Downloading ${ARG_NAME} from ${GIT_URL}#${ARG_GIT_TAG}")
     execute_process(
-      COMMAND git clone -b "${ARG_GIT_TAG}" "${GIT_URL}" "${SOURCE_DIR}"
+      COMMAND git clone -b "${ARG_GIT_TAG}" "${GIT_URL}" ${PACKAGE_DIR}-src
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
@@ -56,7 +69,7 @@ function(cdeps_download_package URL)
     endif()
   endif()
 
-  set(${ARG_NAME}_SOURCE_DIR "${SOURCE_DIR}" PARENT_SCOPE)
+  set(${ARG_NAME}_SOURCE_DIR ${PACKAGE_DIR}-src PARENT_SCOPE)
 endfunction()
 
 # Builds an external package from downloaded source code.
@@ -73,24 +86,19 @@ endfunction()
 # See also the documentation of the `cdeps_download_package` function.
 function(cdeps_build_package URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME" OPTIONS)
+  cdeps_get_package_dir("${ARG_NAME}" PACKAGE_DIR)
 
   cdeps_download_package(
     "${URL}" NAME "${ARG_NAME}" ${ARG_UNPARSED_ARGUMENTS})
 
-  # Set the default CDEPS_ROOT directory if not provided.
-  if(NOT CDEPS_ROOT)
-    set(CDEPS_ROOT ${CMAKE_SOURCE_DIR}/.cdeps)
-  endif()
-
   # Check if the build directory exists; if not, configure and build the package.
-  set(BUILD_DIR ${CDEPS_ROOT}/${ARG_NAME}-build)
-  if(NOT EXISTS "${BUILD_DIR}")
+  if(NOT EXISTS ${PACKAGE_DIR}-build)
     message(STATUS "CDeps: Configuring ${ARG_NAME}")
     foreach(OPTION ${ARG_OPTIONS})
       list(APPEND CONFIGURE_ARGS -D "${OPTION}")
     endforeach()
     execute_process(
-      COMMAND "${CMAKE_COMMAND}" -B "${BUILD_DIR}" ${CONFIGURE_ARGS}
+      COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}-build ${CONFIGURE_ARGS}
         "${${ARG_NAME}_SOURCE_DIR}"
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
@@ -101,7 +109,7 @@ function(cdeps_build_package URL)
 
     message(STATUS "CDeps: Building ${ARG_NAME}")
     execute_process(
-      COMMAND "${CMAKE_COMMAND}" --build "${BUILD_DIR}"
+      COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}-build
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
@@ -110,7 +118,7 @@ function(cdeps_build_package URL)
     endif()
   endif()
 
-  set(${ARG_NAME}_BUILD_DIR "${BUILD_DIR}" PARENT_SCOPE)
+  set(${ARG_NAME}_BUILD_DIR ${PACKAGE_DIR}-build PARENT_SCOPE)
 endfunction()
 
 # Installs an external package after building it from downloaded source code.
@@ -126,21 +134,16 @@ endfunction()
 # `cdeps_build_package` functions.
 function(cdeps_install_package URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME" "")
+  cdeps_get_package_dir("${ARG_NAME}" PACKAGE_DIR)
 
   cdeps_build_package("${URL}" NAME "${ARG_NAME}" ${ARG_UNPARSED_ARGUMENTS})
 
-  # Set the default CDEPS_ROOT directory if not provided.
-  if(NOT CDEPS_ROOT)
-    set(CDEPS_ROOT ${CMAKE_SOURCE_DIR}/.cdeps)
-  endif()
-
   # Check if the installation directory exists; if not, install the package.
-  set(INSTALL_DIR ${CDEPS_ROOT}/${ARG_NAME}-install)
-  if(NOT EXISTS "${INSTALL_DIR}")
+  if(NOT EXISTS ${PACKAGE_DIR}-install)
     message(STATUS "CDeps: Installing ${ARG_NAME}")
     execute_process(
       COMMAND "${CMAKE_COMMAND}" --install "${${ARG_NAME}_BUILD_DIR}"
-        --prefix "${INSTALL_DIR}"
+        --prefix ${PACKAGE_DIR}-install
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
@@ -149,8 +152,9 @@ function(cdeps_install_package URL)
     endif()
   endif()
 
-  # Update CMAKE_PREFIX_PATH if the installed package provides CMake configuration files.
-  if(IS_DIRECTORY ${INSTALL_DIR}/lib/cmake)
-    set(CMAKE_PREFIX_PATH "${INSTALL_DIR}/lib/cmake;${CMAKE_PREFIX_PATH}" PARENT_SCOPE)
+  # Update the prefix path if the installed package provides a CMake directory.
+  if(IS_DIRECTORY ${PACKAGE_DIR}-install/lib/cmake)
+    list(PREPEND CMAKE_PREFIX_PATH "${PACKAGE_DIR}-install/lib/cmake")
+    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} PARENT_SCOPE)
   endif()
 endfunction()
