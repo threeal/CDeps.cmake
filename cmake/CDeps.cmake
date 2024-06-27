@@ -5,19 +5,20 @@ include_guard(GLOBAL)
 
 # Retrieves the path of a package directory.
 #
-# cdeps_get_package_dir(<name> <output_dir>)
+# cdeps_get_package_dir(<url> <output_dir>)
 #
-# This function retrieves the directory path of a package named `<name>` and
+# This function retrieves the directory path of a package with `<url>` and
 # stores it in the `<output_dir>` variable.
 #
 # If the `CDEPS_ROOT` variable is defined, it will locate the package directory
 # under that variable. Otherwise, it will locate the package directory under the
 # `.cdeps` directory of the project's source directory.
-function(cdeps_get_package_dir NAME OUTPUT_DIR)
+function(cdeps_get_package_dir URL OUTPUT_DIR)
+  string(REGEX REPLACE .*:// "" DIR "${URL}")
   if(DEFINED CDEPS_ROOT)
-    set("${OUTPUT_DIR}" ${CDEPS_ROOT}/${NAME} PARENT_SCOPE)
+    set("${OUTPUT_DIR}" ${CDEPS_ROOT}/${DIR} PARENT_SCOPE)
   else()
-    set("${OUTPUT_DIR}" ${CMAKE_SOURCE_DIR}/.cdeps/${NAME} PARENT_SCOPE)
+    set("${OUTPUT_DIR}" ${CMAKE_SOURCE_DIR}/.cdeps/${DIR} PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -47,7 +48,7 @@ endfunction()
 # path of the downloaded source code of the external package.
 function(cdeps_download_package URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME;GIT_TAG" "")
-  cdeps_get_package_dir("${ARG_NAME}" PACKAGE_DIR)
+  cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
   # Check if the source directory exists; if not, download the package using Git.
   if(NOT EXISTS ${PACKAGE_DIR}-src)
@@ -86,7 +87,7 @@ endfunction()
 # See also the documentation of the `cdeps_download_package` function.
 function(cdeps_build_package URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME" OPTIONS)
-  cdeps_get_package_dir("${ARG_NAME}" PACKAGE_DIR)
+  cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
   cdeps_download_package(
     "${URL}" NAME "${ARG_NAME}" ${ARG_UNPARSED_ARGUMENTS})
@@ -134,7 +135,7 @@ endfunction()
 # `cdeps_build_package` functions.
 function(cdeps_install_package URL)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME" "")
-  cdeps_get_package_dir("${ARG_NAME}" PACKAGE_DIR)
+  cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
   cdeps_build_package("${URL}" NAME "${ARG_NAME}" ${ARG_UNPARSED_ARGUMENTS})
 
