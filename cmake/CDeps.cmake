@@ -52,16 +52,19 @@ function(cdeps_download_package URL)
 
   # Check if the source directory exists; if not, download the package using Git.
   if(NOT EXISTS ${PACKAGE_DIR}-src)
-    find_program(GIT_PROGRAM git)
-    if("${GIT_PROGRAM}" STREQUAL GIT_PROGRAM-NOTFOUND)
-      message(FATAL_ERROR "CDeps: Git is required to download packages")
+    if(NOT DEFINED GIT_EXECUTABLE)
+      find_package(Git)
+      if(NOT Git_FOUND OR NOT DEFINED GIT_EXECUTABLE)
+        message(FATAL_ERROR "CDeps: Git is required to download packages")
+      endif()
     endif()
 
     cdeps_resolve_package_url("${URL}" GIT_URL)
 
     message(STATUS "CDeps: Downloading ${ARG_NAME} from ${GIT_URL}#${ARG_GIT_TAG}")
     execute_process(
-      COMMAND git clone -b "${ARG_GIT_TAG}" "${GIT_URL}" ${PACKAGE_DIR}-src
+      COMMAND "${GIT_EXECUTABLE}" clone -b "${ARG_GIT_TAG}" "${GIT_URL}"
+        ${PACKAGE_DIR}-src
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
     )
