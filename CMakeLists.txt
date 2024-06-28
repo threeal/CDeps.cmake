@@ -17,9 +17,9 @@ if(CDEPS_ENABLE_TESTS)
   enable_testing()
 
   file(
-    DOWNLOAD https://github.com/threeal/assertion-cmake/releases/download/v0.3.0/Assertion.cmake
+    DOWNLOAD https://raw.githubusercontent.com/threeal/assertion-cmake/511d7351ebedf65878b20acb1263095ba1c19b0a/cmake/Assertion.cmake
       ${CMAKE_BINARY_DIR}/Assertion.cmake
-    EXPECTED_MD5 851f49c10934d715df5d0b59c8b8c72a)
+    EXPECTED_MD5 3abb541f0d6d50d350a3591ff3cc0c27)
 
   add_test(
     NAME "package directory retrieval"
