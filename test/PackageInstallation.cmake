@@ -4,10 +4,9 @@ find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 include(Assertion.cmake)
 
 set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
+file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
 section("it should fail to install an external package")
-  file(REMOVE_RECURSE "${CDEPS_ROOT}")
-
   assert_fatal_error(
     CALL cdeps_install_package github.com/threeal/cpp-starter
       NAME cpp-starter GIT_TAG main OPTIONS CMAKE_SKIP_INSTALL_RULES=ON

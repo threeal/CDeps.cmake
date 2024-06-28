@@ -4,10 +4,9 @@ find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 include(Assertion.cmake)
 
 set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
+file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
 section("it should fail to configure an external package build")
-  file(REMOVE_RECURSE "${CDEPS_ROOT}")
-
   # TODO: Currently, a Git tag is always required.
   assert_fatal_error(
     CALL cdeps_build_package github.com/threeal/project-starter
@@ -16,8 +15,6 @@ section("it should fail to configure an external package build")
 endsection()
 
 section("it should fail to build an external package")
-  file(REMOVE_RECURSE "${CDEPS_ROOT}")
-
   # TODO: Currently, a Git tag is always required.
   assert_fatal_error(
     CALL cdeps_build_package github.com/threeal/cpp-starter
@@ -27,8 +24,6 @@ section("it should fail to build an external package")
 endsection()
 
 section("it should build an external package")
-  file(REMOVE_RECURSE "${CDEPS_ROOT}")
-
   # TODO: Currently, a Git tag is always required.
   cdeps_build_package(
     github.com/threeal/cpp-starter
