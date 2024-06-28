@@ -1,27 +1,17 @@
 cmake_minimum_required(VERSION 3.5)
 
+find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 include(Assertion.cmake)
 
+set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
+
 section("it should fail to install an external package")
-  file(REMOVE_RECURSE project)
-  file(MAKE_DIRECTORY project)
+  file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
-  # TODO: Currently, a Git tag is always required.
-  file(
-    WRITE project/CMakeLists.txt
-    "cmake_minimum_required(VERSION 3.5)\n"
-    "project(Poject LANGUAGES CXX)\n"
-    "\n"
-    "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
-    "cdeps_install_package(\n"
-    "  github.com/threeal/cpp-starter\n"
-    "  NAME cpp-starter\n"
-    "  GIT_TAG main\n"
-    "  OPTIONS CMAKE_SKIP_INSTALL_RULES=ON)\n")
-
-  assert_execute_process(
-    COMMAND "${CMAKE_COMMAND}" -B project/build project
-    ERROR "CDeps: Failed to install cpp-starter:")
+  assert_fatal_error(
+    CALL cdeps_install_package github.com/threeal/cpp-starter
+      NAME cpp-starter GIT_TAG main OPTIONS CMAKE_SKIP_INSTALL_RULES=ON
+    MESSAGE "CDeps: Failed to install cpp-starter:")
 endsection()
 
 section("it should install an external package")
