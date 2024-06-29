@@ -45,6 +45,11 @@ if(CDEPS_ENABLE_TESTS)
     NAME "package installation"
     COMMAND "${CMAKE_COMMAND}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageInstallation.cmake)
+
+  add_test(
+    NAME "package integration"
+    COMMAND "${CMAKE_COMMAND}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageInstegration.cmake)
 endif()
 
 if(CDEPS_ENABLE_INSTALL)
