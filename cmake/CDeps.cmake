@@ -166,3 +166,20 @@ function(cdeps_install_package NAME URL REF)
 
   set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}-install PARENT_SCOPE)
 endfunction()
+
+function(cdeps_declare_package NAME)
+  function(cdeps_provide_dependency METHOD NAME)
+    if(DEFINED CDEPS_${NAME}_DECLARED_OPTIONS)
+      cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" "")
+      cdeps_install_package(${CDEPS_${NAME}_DECLARED_OPTIONS})
+      find_package("${NAME}" ${ARG_UNPARSED_ARGUMENTS} BYPASS_PROVIDER)
+    endif()
+  endfunction()
+
+  cmake_language(
+    SET_DEPENDENCY_PROVIDER cdeps_provide_dependency
+    SUPPORTED_METHODS FIND_PACKAGE)
+
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "")
+  set(CDEPS_${NAME}_DECLARED_OPTIONS ${ARG_UNPARSED_ARGUMENTS} PARENT_SCOPE)
+endfunction()
