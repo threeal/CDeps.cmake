@@ -8,16 +8,15 @@ file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
 section("it should fail to install an external package")
   assert_fatal_error(
-    CALL cdeps_install_package github.com/threeal/cpp-starter
-      NAME cpp-starter GIT_TAG main OPTIONS CMAKE_SKIP_INSTALL_RULES=ON
-    MESSAGE "CDeps: Failed to install github.com/threeal/cpp-starter:")
+    CALL cdeps_install_package CppStarter github.com/threeal/cpp-starter main
+      OPTIONS CMAKE_SKIP_INSTALL_RULES=ON
+    MESSAGE "CDeps: Failed to install CppStarter:")
 endsection()
 
 section("it should install an external package")
   file(REMOVE_RECURSE project)
   file(MAKE_DIRECTORY project)
 
-  # TODO: Currently, a Git tag is always required.
   file(
     WRITE project/CMakeLists.txt
     "cmake_minimum_required(VERSION 3.5)\n"
@@ -30,17 +29,14 @@ section("it should install an external package")
     "\n"
     "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
     "\n"
-    "cdeps_install_package(\n"
-    "  github.com/threeal/cpp-starter\n"
-    "  NAME cpp-starter\n"
-    "  GIT_TAG main)\n"
+    "cdeps_install_package(CppStarter github.com/threeal/cpp-starter main)\n"
     "\n"
-    "assert(DEFINED github.com/threeal/cpp-starter_INSTALL_DIR)\n"
-    "assert(EXISTS \"\${github.com/threeal/cpp-starter_INSTALL_DIR}\")\n"
+    "assert(DEFINED CppStarter_INSTALL_DIR)\n"
+    "assert(EXISTS \"\${CppStarter_INSTALL_DIR}\")\n"
     "\n"
     "find_package(\n"
     "  MyFibonacci REQUIRED\n"
-    "  HINTS \"\${github.com/threeal/cpp-starter_INSTALL_DIR}\")\n"
+    "  HINTS \"\${CppStarter_INSTALL_DIR}\")\n"
     "\n"
     "add_executable(main main.cpp)\n"
     "target_link_libraries(main my_fibonacci::sequence)\n"

@@ -7,29 +7,22 @@ set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
 file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
 section("it should fail to configure an external package build")
-  # TODO: Currently, a Git tag is always required.
   assert_fatal_error(
-    CALL cdeps_build_package github.com/threeal/project-starter
-      NAME project-starter GIT_TAG main
-    MESSAGE "CDeps: Failed to configure github.com/threeal/project-starter:")
+    CALL cdeps_build_package
+      ProjectStarter github.com/threeal/project-starter main
+    MESSAGE "CDeps: Failed to configure ProjectStarter:")
 endsection()
 
 section("it should fail to build an external package")
-  # TODO: Currently, a Git tag is always required.
   assert_fatal_error(
-    CALL cdeps_build_package github.com/threeal/cpp-starter
-      NAME cpp-starter GIT_TAG main
+    CALL cdeps_build_package CppStarter github.com/threeal/cpp-starter main
       OPTIONS CMAKE_CXX_FLAGS=invalid CMAKE_CXX_COMPILER_WORKS=ON
-    MESSAGE "CDeps: Failed to build github.com/threeal/cpp-starter:")
+    MESSAGE "CDeps: Failed to build CppStarter:")
 endsection()
 
 section("it should build an external package")
-  # TODO: Currently, a Git tag is always required.
-  cdeps_build_package(
-    github.com/threeal/cpp-starter
-    NAME cpp-starter
-    GIT_TAG main)
+  cdeps_build_package(CppStarter github.com/threeal/cpp-starter main)
 
-  assert(DEFINED github.com/threeal/cpp-starter_BUILD_DIR)
-  assert(EXISTS "${github.com/threeal/cpp-starter_BUILD_DIR}")
+  assert(DEFINED CppStarter_BUILD_DIR)
+  assert(EXISTS "${CppStarter_BUILD_DIR}")
 endsection()
