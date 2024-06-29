@@ -45,6 +45,11 @@ if(CDEPS_ENABLE_TESTS)
     NAME "package installation"
     COMMAND "${CMAKE_COMMAND}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageInstallation.cmake)
+
+  add_test(
+    NAME "dependency provider usage"
+    COMMAND "${CMAKE_COMMAND}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/DepProviderUsage.cmake)
 endif()
 
 if(CDEPS_ENABLE_INSTALL)
