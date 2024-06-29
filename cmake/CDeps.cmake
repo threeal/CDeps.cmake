@@ -131,24 +131,22 @@ endfunction()
 
 # Installs an external package after building it from downloaded source code.
 #
-# cdeps_install_package(
-#   <url> [NAME <name>] [GIT_TAG <tag>] [OPTIONS <options>...])
+# cdeps_install_package(<url> [GIT_TAG <tag>] [OPTIONS <options>...])
 #
-# This function installs an external package named `<name>` after building it
-# with `<options>` from source code downloaded from the given `<url>` with
-# a specific `<tag>`.
+# This function installs an external package after building it with `<options>`
+# from source code downloaded from the given `<url>` with a specific `<tag>`.
 #
 # See also the documentation of the `cdeps_download_package` and
 # `cdeps_build_package` functions.
 function(cdeps_install_package URL)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "NAME" "")
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "")
   cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
   cdeps_build_package("${URL}" ${ARG_UNPARSED_ARGUMENTS})
 
   # Check if the installation directory exists; if not, install the package.
   if(NOT EXISTS ${PACKAGE_DIR}-install)
-    message(STATUS "CDeps: Installing ${ARG_NAME}")
+    message(STATUS "CDeps: Installing ${URL}")
     execute_process(
       COMMAND "${CMAKE_COMMAND}" --install "${${URL}_BUILD_DIR}"
         --prefix ${PACKAGE_DIR}-install
@@ -157,7 +155,7 @@ function(cdeps_install_package URL)
     )
     if(NOT "${RES}" EQUAL 0)
       file(REMOVE_RECURSE ${PACKAGE_DIR}-install)
-      message(FATAL_ERROR "CDeps: Failed to install ${ARG_NAME}: ${ERR}")
+      message(FATAL_ERROR "CDeps: Failed to install ${URL}: ${ERR}")
       return()
     endif()
   endif()

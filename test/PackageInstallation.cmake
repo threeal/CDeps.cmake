@@ -10,7 +10,7 @@ section("it should fail to install an external package")
   assert_fatal_error(
     CALL cdeps_install_package github.com/threeal/cpp-starter
       NAME cpp-starter GIT_TAG main OPTIONS CMAKE_SKIP_INSTALL_RULES=ON
-    MESSAGE "CDeps: Failed to install cpp-starter:")
+    MESSAGE "CDeps: Failed to install github.com/threeal/cpp-starter:")
 endsection()
 
 section("it should install an external package")
