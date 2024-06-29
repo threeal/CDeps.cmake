@@ -11,7 +11,7 @@ section("it should fail to configure an external package build")
   assert_fatal_error(
     CALL cdeps_build_package github.com/threeal/project-starter
       NAME project-starter GIT_TAG main
-    MESSAGE "CDeps: Failed to configure project-starter:")
+    MESSAGE "CDeps: Failed to configure github.com/threeal/project-starter:")
 endsection()
 
 section("it should fail to build an external package")
@@ -20,7 +20,7 @@ section("it should fail to build an external package")
     CALL cdeps_build_package github.com/threeal/cpp-starter
       NAME cpp-starter GIT_TAG main
       OPTIONS CMAKE_CXX_FLAGS=invalid CMAKE_CXX_COMPILER_WORKS=ON
-    MESSAGE "CDeps: Failed to build cpp-starter:")
+    MESSAGE "CDeps: Failed to build github.com/threeal/cpp-starter:")
 endsection()
 
 section("it should build an external package")
@@ -30,6 +30,6 @@ section("it should build an external package")
     NAME cpp-starter
     GIT_TAG main)
 
-  assert(DEFINED cpp-starter_BUILD_DIR)
-  assert(EXISTS "${cpp-starter_BUILD_DIR}")
+  assert(DEFINED github.com/threeal/cpp-starter_BUILD_DIR)
+  assert(EXISTS "${github.com/threeal/cpp-starter_BUILD_DIR}")
 endsection()
