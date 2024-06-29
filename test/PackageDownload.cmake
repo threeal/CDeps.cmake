@@ -8,17 +8,14 @@ file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
 section("it should fail to download the source code of an external package")
   assert_fatal_error(
-    CALL cdeps_download_package google.com NAME google
-    MESSAGE "CDeps: Failed to download google:")
+    CALL cdeps_download_package google.com
+    MESSAGE "CDeps: Failed to download google.com:")
 endsection()
 
 section("it should download the source code of an external package")
   # TODO: Currently, a Git tag is always required.
-  cdeps_download_package(
-    github.com/threeal/project-starter
-    NAME project-starter
-    GIT_TAG main)
+  cdeps_download_package(github.com/threeal/project-starter GIT_TAG main)
 
-  assert(DEFINED project-starter_SOURCE_DIR)
-  assert(EXISTS "${project-starter_SOURCE_DIR}")
+  assert(DEFINED github.com/threeal/project-starter_SOURCE_DIR)
+  assert(EXISTS "${github.com/threeal/project-starter_SOURCE_DIR}")
 endsection()
