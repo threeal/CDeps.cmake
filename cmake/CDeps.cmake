@@ -136,6 +136,9 @@ endfunction()
 # This function installs an external package after building it with `<options>`
 # from source code downloaded from the given `<url>` with a specific `<tag>`.
 #
+# This function outputs the `<url>_INSTALL_DIR` variable, which contains the
+# path of the installed external package.
+#
 # See also the documentation of the `cdeps_download_package` and
 # `cdeps_build_package` functions.
 function(cdeps_install_package URL)
@@ -160,9 +163,5 @@ function(cdeps_install_package URL)
     endif()
   endif()
 
-  # Update the prefix path if the installed package provides a CMake directory.
-  if(IS_DIRECTORY ${PACKAGE_DIR}-install/lib/cmake)
-    list(PREPEND CMAKE_PREFIX_PATH "${PACKAGE_DIR}-install/lib/cmake")
-    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} PARENT_SCOPE)
-  endif()
+  set(${URL}_INSTALL_DIR ${PACKAGE_DIR}-install PARENT_SCOPE)
 endfunction()
