@@ -38,15 +38,15 @@ endfunction()
 
 # Downloads the source code of an external package.
 #
-# cdeps_download_package(<url> [GIT_TAG <tag>])
+# cdeps_download_package(<url> <ref>)
 #
 # This function downloads the source code of an external package using Git.
-# It downloads the source code from the given `<url>` with a specific `<tag>`.
+# It downloads the source code from the specified `<url>` with a particular
+# `<ref>`. The `<ref>` can be a branch, tag, or commit hash.
 #
 # This function outputs the `<url>_SOURCE_DIR` variable, which contains the
 # path of the downloaded source code of the external package.
-function(cdeps_download_package URL)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "GIT_TAG" "")
+function(cdeps_download_package URL REF)
   cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
   # Check if the source directory exists; if not, download the package using Git.
@@ -61,9 +61,9 @@ function(cdeps_download_package URL)
 
     cdeps_resolve_package_url("${URL}" GIT_URL)
 
-    message(STATUS "CDeps: Downloading ${URL} from ${GIT_URL}#${ARG_GIT_TAG}")
+    message(STATUS "CDeps: Downloading ${URL} from ${GIT_URL} at ${REF}")
     execute_process(
-      COMMAND "${GIT_EXECUTABLE}" clone -b "${ARG_GIT_TAG}" "${GIT_URL}"
+      COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
         ${PACKAGE_DIR}-src
       ERROR_VARIABLE ERR
       RESULT_VARIABLE RES
@@ -80,20 +80,20 @@ endfunction()
 
 # Builds an external package from downloaded source code.
 #
-# cdeps_build_package(<url> [GIT_TAG <tag>] [OPTIONS <options>...])
+# cdeps_build_package(<url> <ref> [OPTIONS <options>...])
 #
 # This function builds an external package with `<options>` from source code
-# downloaded from the given `<url>` with a specific `<tag>`.
+# downloaded from the specified `<url>` with a particular `<ref>`.
 #
 # This function outputs the `<url>_BUILD_DIR` variable, which contains the
 # path of the built external package.
 #
 # See also the documentation of the `cdeps_download_package` function.
-function(cdeps_build_package URL)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" OPTIONS)
+function(cdeps_build_package URL REF)
+  cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" OPTIONS)
   cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
-  cdeps_download_package("${URL}" ${ARG_UNPARSED_ARGUMENTS})
+  cdeps_download_package("${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
 
   # Check if the build directory exists; if not, configure and build the package.
   if(NOT EXISTS ${PACKAGE_DIR}-build)
@@ -131,21 +131,22 @@ endfunction()
 
 # Installs an external package after building it from downloaded source code.
 #
-# cdeps_install_package(<url> [GIT_TAG <tag>] [OPTIONS <options>...])
+# cdeps_install_package(<url> <ref> [OPTIONS <options>...])
 #
 # This function installs an external package after building it with `<options>`
-# from source code downloaded from the given `<url>` with a specific `<tag>`.
+# from source code downloaded from the specified `<url>` with a particular
+# `<ref>`.
 #
 # This function outputs the `<url>_INSTALL_DIR` variable, which contains the
 # path of the installed external package.
 #
 # See also the documentation of the `cdeps_download_package` and
 # `cdeps_build_package` functions.
-function(cdeps_install_package URL)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "")
+function(cdeps_install_package URL REF)
+  cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" "")
   cdeps_get_package_dir("${URL}" PACKAGE_DIR)
 
-  cdeps_build_package("${URL}" ${ARG_UNPARSED_ARGUMENTS})
+  cdeps_build_package("${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
 
   # Check if the installation directory exists; if not, install the package.
   if(NOT EXISTS ${PACKAGE_DIR}-install)
