@@ -21,5 +21,5 @@ section("it should download the source code of an external package in the correc
   assert(EXISTS "${ProjectStarter_SOURCE_DIR}")
 
   cdeps_get_package_dir(ProjectStarter PACKAGE_DIR)
-  assert(ProjectStarter_SOURCE_DIR STREQUAL "${PACKAGE_DIR}-src")
+  assert(ProjectStarter_SOURCE_DIR STREQUAL "${PACKAGE_DIR}/src")
 endsection()

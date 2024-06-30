@@ -25,5 +25,5 @@ section("it should install an external package in the correct path")
   assert(EXISTS "${CppStarter_INSTALL_DIR}")
 
   cdeps_get_package_dir(CppStarter PACKAGE_DIR)
-  assert(CppStarter_INSTALL_DIR STREQUAL "${PACKAGE_DIR}-install")
+  assert(CppStarter_INSTALL_DIR STREQUAL "${PACKAGE_DIR}/install")
 endsection()

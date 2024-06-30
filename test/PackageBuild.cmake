@@ -29,5 +29,5 @@ section("it should build an external package in the correct path")
   assert(EXISTS "${CppStarter_BUILD_DIR}")
 
   cdeps_get_package_dir(CppStarter PACKAGE_DIR)
-  assert(CppStarter_BUILD_DIR STREQUAL "${PACKAGE_DIR}-build")
+  assert(CppStarter_BUILD_DIR STREQUAL "${PACKAGE_DIR}/build")
 endsection()
