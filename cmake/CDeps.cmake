@@ -35,6 +35,10 @@ function(cdeps_resolve_package_url URL OUTPUT_URL)
   endif()
 endfunction()
 
+function(cdeps_read_package_lock NAME TYPE OUTPUT_VAR)
+  if(EXISTS
+endfunction()
+
 # Downloads the source code of an external package.
 #
 # cdeps_download_package(<name> <url> <ref>)
