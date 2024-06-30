@@ -22,7 +22,12 @@ endsection()
 
 section("it should build an external package")
   cdeps_build_package(CppStarter github.com/threeal/cpp-starter main)
+endsection()
 
+section("it should build an external package in the correct path")
   assert(DEFINED CppStarter_BUILD_DIR)
   assert(EXISTS "${CppStarter_BUILD_DIR}")
+
+  cdeps_get_package_dir(CppStarter PACKAGE_DIR)
+  assert(CppStarter_BUILD_DIR STREQUAL "${PACKAGE_DIR}/build")
 endsection()
