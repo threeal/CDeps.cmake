@@ -18,7 +18,12 @@ section("it should install an external package")
   file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
   cdeps_install_package(CppStarter github.com/threeal/cpp-starter main)
+endsection()
 
+section("it should install an external package in the correct path")
   assert(DEFINED CppStarter_INSTALL_DIR)
   assert(EXISTS "${CppStarter_INSTALL_DIR}")
+
+  cdeps_get_package_dir(CppStarter PACKAGE_DIR)
+  assert(CppStarter_INSTALL_DIR STREQUAL "${PACKAGE_DIR}-install")
 endsection()
