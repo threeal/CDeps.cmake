@@ -22,19 +22,12 @@ if(CDEPS_ENABLE_TESTS)
     EXPECTED_MD5 1d8ec589d6cc15772581bf77eb3873ff)
   include(${CMAKE_BINARY_DIR}/Assertion.cmake)
 
-  assertion_add_test(test/cdeps_get_package_dir.cmake
-    NAME "package directory retrieval")
-
-  assertion_add_test(test/cdeps_resolve_package_url.cmake
-    NAME "package URL resolve")
-
-  assertion_add_test(test/cdeps_download_package.cmake NAME "package download")
-  assertion_add_test(test/cdeps_build_package.cmake NAME "package build")
-
-  assertion_add_test(test/cdeps_install_package.cmake
-    NAME "package installation")
-
-  assertion_add_test(test/integration.cmake NAME "package integration")
+  assertion_add_test(test/cdeps_build_package.cmake)
+  assertion_add_test(test/cdeps_download_package.cmake)
+  assertion_add_test(test/cdeps_get_package_dir.cmake)
+  assertion_add_test(test/cdeps_install_package.cmake)
+  assertion_add_test(test/cdeps_resolve_package_url.cmake)
+  assertion_add_test(test/integration.cmake)
 endif()
 
 if(CDEPS_ENABLE_INSTALL)
