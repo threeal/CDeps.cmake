@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.5)
-
-include(Assertion.cmake)
-
 section("it should generate the source code of the test project")
   file(REMOVE_RECURSE project)
   file(MAKE_DIRECTORY project)
