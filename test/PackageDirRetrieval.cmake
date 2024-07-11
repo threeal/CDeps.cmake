@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-
 find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
-include(Assertion.cmake)
 
 set(CMAKE_SOURCE_DIR source-dir)
 

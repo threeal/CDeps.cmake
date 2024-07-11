@@ -20,36 +20,16 @@ if(CDEPS_ENABLE_TESTS)
     DOWNLOAD https://github.com/threeal/assertion-cmake/releases/download/v1.0.0/Assertion.cmake
       ${CMAKE_BINARY_DIR}/Assertion.cmake
     EXPECTED_MD5 1d8ec589d6cc15772581bf77eb3873ff)
+  include(${CMAKE_BINARY_DIR}/Assertion.cmake)
 
-  add_test(
-    NAME "package directory retrieval"
-    COMMAND "${CMAKE_COMMAND}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageDirRetrieval.cmake)
+  assertion_add_test(test/PackageDirRetrieval.cmake
+    NAME "package directory retrieval")
 
-  add_test(
-    NAME "package URL resolve"
-    COMMAND "${CMAKE_COMMAND}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageUrlResolve.cmake)
-
-  add_test(
-    NAME "package download"
-    COMMAND "${CMAKE_COMMAND}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageDownload.cmake)
-
-  add_test(
-    NAME "package build"
-    COMMAND "${CMAKE_COMMAND}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageBuild.cmake)
-
-  add_test(
-    NAME "package installation"
-    COMMAND "${CMAKE_COMMAND}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageInstallation.cmake)
-
-  add_test(
-    NAME "package integration"
-    COMMAND "${CMAKE_COMMAND}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/test/PackageInstegration.cmake)
+  assertion_add_test(test/PackageUrlResolve.cmake NAME "package URL resolve")
+  assertion_add_test(test/PackageDownload.cmake NAME "package download")
+  assertion_add_test(test/PackageBuild.cmake NAME "package build")
+  assertion_add_test(test/PackageInstallation.cmake NAME "package installation")
+  assertion_add_test(test/PackageInstegration.cmake NAME "package integration")
 endif()
 
 if(CDEPS_ENABLE_INSTALL)
