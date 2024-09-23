@@ -92,7 +92,7 @@ function(cdeps_build_package NAME URL REF)
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" OPTIONS)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  cdeps_download_package("${NAME}" "${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
+  cdeps_download_package("${NAME}" "${URL}" "${REF}")
 
   # Check if the build directory exists; if not, configure and build the package.
   if(NOT EXISTS ${PACKAGE_DIR}/build)
