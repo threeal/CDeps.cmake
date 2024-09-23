@@ -157,7 +157,7 @@ endfunction()
 # a particular `<ref>`.
 #
 # This function outputs the `<url>_INSTALL_DIR` variable, which contains the
-# path of the installed external package.
+# path to the installed external package.
 #
 # See also the documentation of the `cdeps_download_package` and
 # `cdeps_build_package` functions.
@@ -165,23 +165,34 @@ function(cdeps_install_package NAME URL REF)
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" "")
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  cdeps_build_package("${NAME}" "${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
-
-  # Check if the installation directory exists; if not, install the package.
-  if(NOT EXISTS ${PACKAGE_DIR}/install)
-    message(STATUS "CDeps: Installing ${NAME}")
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
-        --prefix ${PACKAGE_DIR}/install
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
-      message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")
+  # Check if the lock file is valid; renstall the package if it doesn't.
+  if(EXISTS ${PACKAGE_DIR}/install.lock)
+    file(READ ${PACKAGE_DIR}/install.lock LOCK_ARGS)
+    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF} ${ARG_UNPARSED_ARGUMENTS}")
+      message(STATUS "CDeps: Using existing install directory for ${NAME}")
+      set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
       return()
     endif()
   endif()
+
+  cdeps_build_package("${NAME}" "${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
+
+  message(STATUS "CDeps: Installing ${NAME}")
+  file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
+      --prefix ${PACKAGE_DIR}/install
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
+    message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  file(WRITE ${PACKAGE_DIR}/install.lock
+    "${NAME} ${URL} ${REF} ${ARG_UNPARSED_ARGUMENTS}")
 
   set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
 endfunction()
