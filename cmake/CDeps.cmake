@@ -98,7 +98,7 @@ endfunction()
 #
 # See also the documentation of the `cdeps_download_package` function.
 function(cdeps_build_package NAME URL REF)
-  cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" OPTIONS)
+  cmake_parse_arguments(PARSE_ARGV 3 ARG "" "" OPTIONS)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
   # Check if the lock file is valid; rebuild the package if it doesn't.
@@ -162,7 +162,7 @@ endfunction()
 # See also the documentation of the `cdeps_download_package` and
 # `cdeps_build_package` functions.
 function(cdeps_install_package NAME URL REF)
-  cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" "")
+  cmake_parse_arguments(PARSE_ARGV 3 ARG "" "" "")
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
   # Check if the lock file is valid; renstall the package if it doesn't.
