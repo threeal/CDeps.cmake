@@ -44,36 +44,45 @@ endfunction()
 # particular `<ref>`. The `<ref>` can be a branch, tag, or commit hash.
 #
 # This function outputs the `<name>_SOURCE_DIR` variable, which contains the
-# path of the downloaded source code of the external package.
+# path to the downloaded source code of the external package.
 function(cdeps_download_package NAME URL REF)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  # Check if the source directory exists; if not, download the package using Git.
-  if(NOT EXISTS ${PACKAGE_DIR}/src)
-    if(NOT DEFINED GIT_EXECUTABLE)
-      find_package(Git)
-      if(NOT Git_FOUND OR NOT DEFINED GIT_EXECUTABLE)
-        message(FATAL_ERROR "CDeps: Git is required to download packages")
-        return()
-      endif()
-    endif()
-
-    cdeps_resolve_package_url("${URL}" GIT_URL)
-
-    message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
-    execute_process(
-      COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
-        ${PACKAGE_DIR}/src
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
-      message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
+  # Check if the lock file is valid; redownload the source code if it doesn't.
+  if(EXISTS ${PACKAGE_DIR}/src.lock)
+    file(READ ${PACKAGE_DIR}/src.lock LOCK_ARGS)
+    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF}")
+      message(STATUS "CDeps: Using existing source directory for ${NAME}")
+      set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
       return()
     endif()
   endif()
 
+  if(NOT DEFINED GIT_EXECUTABLE)
+    find_package(Git)
+    if(NOT Git_FOUND OR NOT DEFINED GIT_EXECUTABLE)
+      message(FATAL_ERROR "CDeps: Git is required to download packages")
+      return()
+    endif()
+  endif()
+
+  cdeps_resolve_package_url("${URL}" GIT_URL)
+
+  message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
+  file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
+  execute_process(
+    COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
+      ${PACKAGE_DIR}/src
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
+    message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  file(WRITE ${PACKAGE_DIR}/src.lock "${NAME} ${URL} ${REF}")
   set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
 endfunction()
 
