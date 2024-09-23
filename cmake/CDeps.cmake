@@ -44,36 +44,45 @@ endfunction()
 # particular `<ref>`. The `<ref>` can be a branch, tag, or commit hash.
 #
 # This function outputs the `<name>_SOURCE_DIR` variable, which contains the
-# path of the downloaded source code of the external package.
+# path to the downloaded source code of the external package.
 function(cdeps_download_package NAME URL REF)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  # Check if the source directory exists; if not, download the package using Git.
-  if(NOT EXISTS ${PACKAGE_DIR}/src)
-    if(NOT DEFINED GIT_EXECUTABLE)
-      find_package(Git)
-      if(NOT Git_FOUND OR NOT DEFINED GIT_EXECUTABLE)
-        message(FATAL_ERROR "CDeps: Git is required to download packages")
-        return()
-      endif()
-    endif()
-
-    cdeps_resolve_package_url("${URL}" GIT_URL)
-
-    message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
-    execute_process(
-      COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
-        ${PACKAGE_DIR}/src
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
-      message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
+  # Check if the lock file is valid; redownload the source code if it doesn't.
+  if(EXISTS ${PACKAGE_DIR}/src.lock)
+    file(READ ${PACKAGE_DIR}/src.lock LOCK_ARGS)
+    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF}")
+      message(STATUS "CDeps: Using existing source directory for ${NAME}")
+      set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
       return()
     endif()
   endif()
 
+  if(NOT DEFINED GIT_EXECUTABLE)
+    find_package(Git)
+    if(NOT Git_FOUND OR NOT DEFINED GIT_EXECUTABLE)
+      message(FATAL_ERROR "CDeps: Git is required to download packages")
+      return()
+    endif()
+  endif()
+
+  cdeps_resolve_package_url("${URL}" GIT_URL)
+
+  message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
+  file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
+  execute_process(
+    COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
+      ${PACKAGE_DIR}/src
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
+    message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  file(WRITE ${PACKAGE_DIR}/src.lock "${NAME} ${URL} ${REF}")
   set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
 endfunction()
 
@@ -85,45 +94,56 @@ endfunction()
 # source code downloaded from the specified `<url>` with a particular `<ref>`.
 #
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
-# of the built external package.
+# to the built external package.
 #
 # See also the documentation of the `cdeps_download_package` function.
 function(cdeps_build_package NAME URL REF)
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" OPTIONS)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  cdeps_download_package("${NAME}" "${URL}" "${REF}")
-
-  # Check if the build directory exists; if not, configure and build the package.
-  if(NOT EXISTS ${PACKAGE_DIR}/build)
-    message(STATUS "CDeps: Configuring ${NAME}")
-    foreach(OPTION ${ARG_OPTIONS})
-      list(APPEND CONFIGURE_ARGS -D "${OPTION}")
-    endforeach()
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
-        "${${NAME}_SOURCE_DIR}"
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
-      message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
-      return()
-    endif()
-
-    message(STATUS "CDeps: Building ${NAME}")
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
-      message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
+  # Check if the lock file is valid; rebuild the package if it doesn't.
+  if(EXISTS ${PACKAGE_DIR}/build.lock)
+    file(READ ${PACKAGE_DIR}/build.lock LOCK_ARGS)
+    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF} OPTIONS ${ARG_OPTIONS}")
+      message(STATUS "CDeps: Using existing build directory for ${NAME}")
+      set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
       return()
     endif()
   endif()
+
+  cdeps_download_package("${NAME}" "${URL}" "${REF}")
+
+  message(STATUS "CDeps: Configuring ${NAME}")
+  file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+  foreach(OPTION ${ARG_OPTIONS})
+    list(APPEND CONFIGURE_ARGS -D "${OPTION}")
+  endforeach()
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
+      "${${NAME}_SOURCE_DIR}"
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+    message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  message(STATUS "CDeps: Building ${NAME}")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+    message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  file(WRITE ${PACKAGE_DIR}/build.lock
+    "${NAME} ${URL} ${REF} OPTIONS ${ARG_OPTIONS}")
 
   set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
 endfunction()
@@ -137,7 +157,7 @@ endfunction()
 # a particular `<ref>`.
 #
 # This function outputs the `<url>_INSTALL_DIR` variable, which contains the
-# path of the installed external package.
+# path to the installed external package.
 #
 # See also the documentation of the `cdeps_download_package` and
 # `cdeps_build_package` functions.
@@ -145,23 +165,34 @@ function(cdeps_install_package NAME URL REF)
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" "")
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  cdeps_build_package("${NAME}" "${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
-
-  # Check if the installation directory exists; if not, install the package.
-  if(NOT EXISTS ${PACKAGE_DIR}/install)
-    message(STATUS "CDeps: Installing ${NAME}")
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
-        --prefix ${PACKAGE_DIR}/install
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
-      message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")
+  # Check if the lock file is valid; renstall the package if it doesn't.
+  if(EXISTS ${PACKAGE_DIR}/install.lock)
+    file(READ ${PACKAGE_DIR}/install.lock LOCK_ARGS)
+    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF} ${ARG_UNPARSED_ARGUMENTS}")
+      message(STATUS "CDeps: Using existing install directory for ${NAME}")
+      set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
       return()
     endif()
   endif()
+
+  cdeps_build_package("${NAME}" "${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
+
+  message(STATUS "CDeps: Installing ${NAME}")
+  file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
+      --prefix ${PACKAGE_DIR}/install
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
+    message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  file(WRITE ${PACKAGE_DIR}/install.lock
+    "${NAME} ${URL} ${REF} ${ARG_UNPARSED_ARGUMENTS}")
 
   set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
 endfunction()
