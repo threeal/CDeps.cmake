@@ -94,45 +94,56 @@ endfunction()
 # source code downloaded from the specified `<url>` with a particular `<ref>`.
 #
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
-# of the built external package.
+# to the built external package.
 #
 # See also the documentation of the `cdeps_download_package` function.
 function(cdeps_build_package NAME URL REF)
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "" OPTIONS)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  cdeps_download_package("${NAME}" "${URL}" "${REF}")
-
-  # Check if the build directory exists; if not, configure and build the package.
-  if(NOT EXISTS ${PACKAGE_DIR}/build)
-    message(STATUS "CDeps: Configuring ${NAME}")
-    foreach(OPTION ${ARG_OPTIONS})
-      list(APPEND CONFIGURE_ARGS -D "${OPTION}")
-    endforeach()
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
-        "${${NAME}_SOURCE_DIR}"
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
-      message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
-      return()
-    endif()
-
-    message(STATUS "CDeps: Building ${NAME}")
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
-      ERROR_VARIABLE ERR
-      RESULT_VARIABLE RES
-    )
-    if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
-      message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
+  # Check if the lock file is valid; rebuild the package if it doesn't.
+  if(EXISTS ${PACKAGE_DIR}/build.lock)
+    file(READ ${PACKAGE_DIR}/build.lock LOCK_ARGS)
+    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF} OPTIONS ${ARG_OPTIONS}")
+      message(STATUS "CDeps: Using existing build directory for ${NAME}")
+      set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
       return()
     endif()
   endif()
+
+  cdeps_download_package("${NAME}" "${URL}" "${REF}")
+
+  message(STATUS "CDeps: Configuring ${NAME}")
+  file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+  foreach(OPTION ${ARG_OPTIONS})
+    list(APPEND CONFIGURE_ARGS -D "${OPTION}")
+  endforeach()
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
+      "${${NAME}_SOURCE_DIR}"
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+    message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  message(STATUS "CDeps: Building ${NAME}")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
+    ERROR_VARIABLE ERR
+    RESULT_VARIABLE RES
+  )
+  if(NOT "${RES}" EQUAL 0)
+    file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+    message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
+    return()
+  endif()
+
+  file(WRITE ${PACKAGE_DIR}/build.lock
+    "${NAME} ${URL} ${REF} OPTIONS ${ARG_OPTIONS}")
 
   set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
 endfunction()
