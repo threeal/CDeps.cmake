@@ -35,24 +35,26 @@ function(cdeps_resolve_package_url URL OUTPUT_URL)
   endif()
 endfunction()
 
-# Downloads the source code of an external package.
+# Downloads the source files of an external package.
 #
 # cdeps_download_package(<name> <url> <ref>)
 #
-# This function downloads the source code of an external package named `<name>`
-# using Git. It downloads the source code from the specified `<url>` with a
+# This function downloads the source files of an external package named `<name>`
+# using Git. It downloads the source files from the specified `<url>` with a
 # particular `<ref>`. The `<ref>` can be a branch, tag, or commit hash.
 #
 # This function outputs the `<name>_SOURCE_DIR` variable, which contains the
-# path to the downloaded source code of the external package.
+# path to the downloaded source files of the external package.
 function(cdeps_download_package NAME URL REF)
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
-  # Check if the lock file is valid; redownload the source code if it doesn't.
+  set(SOURCE_LOCK "${NAME} ${URL} ${REF}")
+
+  # Check if the lock file is valid; redownload the source files if it isn't.
   if(EXISTS ${PACKAGE_DIR}/src.lock)
-    file(READ ${PACKAGE_DIR}/src.lock LOCK_ARGS)
-    if(LOCK_ARGS STREQUAL "${NAME} ${URL} ${REF}")
-      message(STATUS "CDeps: Using existing source directory for ${NAME}")
+    file(READ ${PACKAGE_DIR}/src.lock LOCK)
+    if(LOCK STREQUAL SOURCE_LOCK)
+      message(STATUS "CDeps: Using existing ${NAME} source files")
       set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
       return()
     else()
@@ -85,7 +87,7 @@ function(cdeps_download_package NAME URL REF)
     return()
   endif()
 
-  file(WRITE ${PACKAGE_DIR}/src.lock "${NAME} ${URL} ${REF}")
+  file(WRITE ${PACKAGE_DIR}/src.lock "${SOURCE_LOCK}")
   set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
 endfunction()
 
