@@ -3,6 +3,28 @@ find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
 file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
+function(test_install_external_package)
+  section("it should install an external package")
+    cdeps_install_package(CppStarter github.com/threeal/cpp-starter v1.0.0)
+
+    section("it should install to the correct path")
+      assert(DEFINED CppStarter_INSTALL_DIR)
+      assert(EXISTS "${CppStarter_INSTALL_DIR}")
+
+      cdeps_get_package_dir(CppStarter PACKAGE_DIR)
+      assert(CppStarter_INSTALL_DIR STREQUAL "${PACKAGE_DIR}/install")
+    endsection()
+
+    section("it should install the correct targets")
+      assert_execute_process(
+        COMMAND ${CppStarter_INSTALL_DIR}/bin/generate_sequence 5
+        OUTPUT "1 1 2 3 5")
+    endsection()
+  endsection()
+endfunction()
+
+test_install_external_package()
+
 section("it should fail to install an external package with invalid options")
   assert_fatal_error(
     CALL cdeps_install_package CppStarter github.com/threeal/cpp-starter v1.0.0
@@ -10,23 +32,7 @@ section("it should fail to install an external package with invalid options")
     MESSAGE "CDeps: Failed to install CppStarter:")
 endsection()
 
-section("it should install an external package")
-  cdeps_install_package(CppStarter github.com/threeal/cpp-starter v1.0.0)
-
-  section("it should install to the correct path")
-    assert(DEFINED CppStarter_INSTALL_DIR)
-    assert(EXISTS "${CppStarter_INSTALL_DIR}")
-
-    cdeps_get_package_dir(CppStarter PACKAGE_DIR)
-    assert(CppStarter_INSTALL_DIR STREQUAL "${PACKAGE_DIR}/install")
-  endsection()
-
-  section("it should install the correct targets")
-    assert_execute_process(
-      COMMAND ${CppStarter_INSTALL_DIR}/bin/generate_sequence 5
-      OUTPUT "1 1 2 3 5")
-  endsection()
-endsection()
+test_install_external_package()
 
 section("it should not reinstall an external package")
   set(PREV_CMAKE_COMMAND "${CMAKE_COMMAND}")

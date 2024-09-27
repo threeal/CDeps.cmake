@@ -55,6 +55,9 @@ function(cdeps_download_package NAME URL REF)
       message(STATUS "CDeps: Using existing source directory for ${NAME}")
       set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
       return()
+    else()
+      file(REMOVE ${PACKAGE_DIR}/src.lock)
+      file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
     endif()
   endif()
 
@@ -69,7 +72,6 @@ function(cdeps_download_package NAME URL REF)
   cdeps_resolve_package_url("${URL}" GIT_URL)
 
   message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
-  file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
       ${PACKAGE_DIR}/src
@@ -109,13 +111,15 @@ function(cdeps_build_package NAME URL REF)
       message(STATUS "CDeps: Using existing build directory for ${NAME}")
       set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
       return()
+    else()
+      file(REMOVE ${PACKAGE_DIR}/build.lock)
+      file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
     endif()
   endif()
 
   cdeps_download_package("${NAME}" "${URL}" "${REF}")
 
   message(STATUS "CDeps: Configuring ${NAME}")
-  file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
   foreach(OPTION ${ARG_OPTIONS})
     list(APPEND CONFIGURE_ARGS -D "${OPTION}")
   endforeach()
@@ -175,13 +179,15 @@ function(cdeps_install_package NAME URL REF)
       message(STATUS "CDeps: Using existing install directory for ${NAME}")
       set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
       return()
+    else()
+      file(REMOVE ${PACKAGE_DIR}/install.lock)
+      file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
     endif()
   endif()
 
   cdeps_build_package("${NAME}" "${URL}" "${REF}" ${ARG_UNPARSED_ARGUMENTS})
 
   message(STATUS "CDeps: Installing ${NAME}")
-  file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
   execute_process(
     COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
       --prefix ${PACKAGE_DIR}/install
