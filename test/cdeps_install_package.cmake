@@ -52,24 +52,7 @@ endsection()
 
 macro(test_build_and_install_external_package)
   section("it should build an external package")
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" -B ${SAMPLE_PACKAGE_DIR}/build
-        ${SAMPLE_PACKAGE_DIR}/src --fresh
-      RESULT_VARIABLE RES
-      OUTPUT_QUIET)
-    assert(RES EQUAL 0)
-
-    execute_process(
-      COMMAND "${CMAKE_COMMAND}" --build ${SAMPLE_PACKAGE_DIR}/build
-      RESULT_VARIABLE RES
-      OUTPUT_QUIET)
-    assert(RES EQUAL 0)
-
-    file(
-      WRITE ${SAMPLE_PACKAGE_DIR}/build.lock
-      "Sample github.com/user/sample main")
-
-    set(Sample_BUILD_DIR ${SAMPLE_PACKAGE_DIR}/build)
+    cdeps_build_package(Sample)
   endsection()
 
   section("it should install an external package")
@@ -97,24 +80,7 @@ endmacro()
 test_build_and_install_external_package()
 
 section("it should rebuild an external package with different options")
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" -B ${SAMPLE_PACKAGE_DIR}/build
-      ${SAMPLE_PACKAGE_DIR}/src -D BUILD_MARS=ON --fresh
-    RESULT_VARIABLE RES
-    OUTPUT_QUIET)
-  assert(RES EQUAL 0)
-
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" --build ${SAMPLE_PACKAGE_DIR}/build
-    RESULT_VARIABLE RES
-    OUTPUT_QUIET)
-  assert(RES EQUAL 0)
-
-  file(
-    WRITE ${SAMPLE_PACKAGE_DIR}/build.lock
-    "Sample github.com/user/sample main OPTIONS BUILD_MARS=ON")
-
-  set(Sample_BUILD_DIR ${SAMPLE_PACKAGE_DIR}/build)
+  cdeps_build_package(Sample OPTIONS BUILD_MARS=ON)
 endsection()
 
 section("it should reinstall an external package")
