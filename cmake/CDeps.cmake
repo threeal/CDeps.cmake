@@ -75,6 +75,7 @@ function(cdeps_download_package NAME URL REF)
       ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
+    OUTPUT_QUIET
   )
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
@@ -123,6 +124,7 @@ function(cdeps_build_package NAME URL REF)
       "${${NAME}_SOURCE_DIR}"
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
+    OUTPUT_QUIET
   )
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
@@ -135,6 +137,7 @@ function(cdeps_build_package NAME URL REF)
     COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
+    OUTPUT_QUIET
   )
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
@@ -184,6 +187,7 @@ function(cdeps_install_package NAME URL REF)
       --prefix ${PACKAGE_DIR}/install
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
+    OUTPUT_QUIET
   )
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
