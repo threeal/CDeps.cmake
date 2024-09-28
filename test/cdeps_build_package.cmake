@@ -60,6 +60,10 @@ function(test_generate_and_build_external_package)
       assert(Sample_BUILD_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/build)
     endsection()
 
+    section("it should use the correct build system generator")
+      assert(NOT EXISTS ${Sample_BUILD_DIR}/build.ninja)
+    endsection()
+
     section("it should build the correct targets")
       assert(EXISTS ${SAMPLE_PACKAGE_DIR}/build/earth)
       assert_execute_process(COMMAND ${SAMPLE_PACKAGE_DIR}/build/earth)
@@ -72,13 +76,17 @@ endfunction()
 test_generate_and_build_external_package()
 
 section("it should rebuild an external package with a different options")
-  cdeps_build_package(Sample OPTIONS BUILD_MARS=ON)
+  cdeps_build_package(Sample GENERATOR Ninja OPTIONS BUILD_MARS=ON)
 
   section("it should rebuild in the correct path")
     assert(DEFINED Sample_BUILD_DIR)
     assert(EXISTS "${Sample_BUILD_DIR}")
 
     assert(Sample_BUILD_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/build)
+  endsection()
+
+  section("it should use the correct build system generator")
+    assert(EXISTS ${Sample_BUILD_DIR}/build.ninja)
   endsection()
 
   section("it should rebuild the correct targets")
@@ -123,6 +131,10 @@ section("it should not rebuild an external package")
     assert(EXISTS "${Sample_BUILD_DIR}")
 
     assert(Sample_BUILD_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/build)
+  endsection()
+
+  section("it should maintain the correct build system generator")
+    assert(NOT EXISTS ${Sample_BUILD_DIR}/build.ninja)
   endsection()
 
   section("it should maintain the build targets")
