@@ -47,10 +47,12 @@ section("it should redownload an external package with a different version")
   endsection()
 endsection()
 
-section("it should fail to download an invalid external package")
+section(
+  "it should fail to download an external package with an invalid version")
   assert_fatal_error(
-    CALL cdeps_download_package Google google.com main
-    MESSAGE "CDeps: Failed to download Google:")
+    CALL cdeps_download_package ProjectStarter
+      github.com/threeal/project-starter invalid
+    MESSAGE "CDeps: Failed to download ProjectStarter:")
 endsection()
 
 test_download_external_package()
