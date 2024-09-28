@@ -135,7 +135,7 @@ function(cdeps_build_package NAME)
   endforeach()
   execute_process(
     COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
-      "${${NAME}_SOURCE_DIR}"
+      ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET
