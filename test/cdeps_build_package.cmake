@@ -12,7 +12,7 @@ section(
     MESSAGE "CDeps: Sample must be downloaded before building")
 endsection()
 
-macro(test_generate_and_build_external_package)
+function(test_generate_and_build_external_package)
   section("it should generate external package source files")
     file(
       WRITE ${SAMPLE_PACKAGE_DIR}/src/CMakeLists.txt
@@ -48,8 +48,6 @@ macro(test_generate_and_build_external_package)
     file(
       WRITE ${SAMPLE_PACKAGE_DIR}/src.lock
       "Sample github.com/user/sample main")
-
-    set(Sample_SOURCE_DIR ${SAMPLE_PACKAGE_DIR}/src)
   endsection()
 
   section("it should build an external package")
@@ -69,7 +67,7 @@ macro(test_generate_and_build_external_package)
       assert(NOT EXISTS ${SAMPLE_PACKAGE_DIR}/build/mars)
     endsection()
   endsection()
-endmacro()
+endfunction()
 
 test_generate_and_build_external_package()
 

@@ -135,7 +135,7 @@ function(cdeps_build_package NAME)
   endforeach()
   execute_process(
     COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
-      "${${NAME}_SOURCE_DIR}"
+      ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET
@@ -198,7 +198,7 @@ function(cdeps_install_package NAME)
 
   message(STATUS "CDeps: Installing ${NAME}")
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
+    COMMAND "${CMAKE_COMMAND}" --install ${PACKAGE_DIR}/build
       --prefix ${PACKAGE_DIR}/install
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
