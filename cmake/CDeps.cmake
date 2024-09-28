@@ -93,16 +93,25 @@ endfunction()
 
 # Builds an external package.
 #
-# cdeps_build_package(<name> [OPTIONS <options>...])
+# cdeps_build_package(<name> [GENERATOR <generator>] [OPTIONS <options>...])
 #
-# This function builds an external package named `<name>` with `<options>`. If
-# the package is already built, it does nothing. The `<name>` package must
-# already be downloaded before calling this function.
+# This function builds an external package named `<name>` with the specified
+# options. If the package is already built, it does nothing. The `<name>`
+# package must be downloaded before calling this function.
+#
+# If the `GENERATOR` option is specified, the package will be built using the
+# `<generator>` build system generator. Otherwise, it will be built using the
+# default build system generator, which is platform-specific.
+#
+# If the `OPTIONS` option is specified, an additional variable specified in each
+# `<options>...` will be defined for building the package. The `<options>...`
+# must be in the format `NAME=VALUE`, where `NAME` is the variable name and
+# `VALUE` is the variable value.
 #
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
 # to the built external package.
 function(cdeps_build_package NAME)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" OPTIONS)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" GENERATOR OPTIONS)
 
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
   if(NOT EXISTS ${PACKAGE_DIR}/src.lock)
@@ -112,6 +121,9 @@ function(cdeps_build_package NAME)
 
   file(READ ${PACKAGE_DIR}/src.lock SOURCE_LOCK)
   set(BUILD_LOCK "${SOURCE_LOCK}")
+  if(DEFINED ARG_GENERATOR)
+    string(APPEND BUILD_LOCK " GENERATOR ${ARG_GENERATOR}")
+  endif()
   if(DEFINED ARG_OPTIONS)
     string(APPEND BUILD_LOCK " OPTIONS ${ARG_OPTIONS}")
   endif()
@@ -130,6 +142,9 @@ function(cdeps_build_package NAME)
   endif()
 
   message(STATUS "CDeps: Configuring ${NAME}")
+  if(DEFINED ARG_GENERATOR)
+    list(APPEND CONFIGURE_ARGS -G "${ARG_GENERATOR}")
+  endif()
   foreach(OPTION ${ARG_OPTIONS})
     list(APPEND CONFIGURE_ARGS -D "${OPTION}")
   endforeach()
