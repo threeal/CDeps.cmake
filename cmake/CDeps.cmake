@@ -198,7 +198,7 @@ function(cdeps_install_package NAME)
 
   message(STATUS "CDeps: Installing ${NAME}")
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" --install "${${NAME}_BUILD_DIR}"
+    COMMAND "${CMAKE_COMMAND}" --install ${PACKAGE_DIR}/build
       --prefix ${PACKAGE_DIR}/install
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES

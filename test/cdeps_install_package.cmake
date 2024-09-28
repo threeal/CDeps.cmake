@@ -50,7 +50,7 @@ section("it should fail to install an external package that has not been built")
     MESSAGE "CDeps: Sample must be built before installation")
 endsection()
 
-macro(test_build_and_install_external_package)
+function(test_build_and_install_external_package)
   section("it should build an external package")
     cdeps_build_package(Sample)
   endsection()
@@ -75,7 +75,7 @@ macro(test_build_and_install_external_package)
       assert(NOT EXISTS ${Sample_INSTALL_DIR}/bin/mars)
     endsection()
   endsection()
-endmacro()
+endfunction()
 
 test_build_and_install_external_package()
 
