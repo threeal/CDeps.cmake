@@ -22,6 +22,13 @@ function(test_download_external_package)
         COMMAND ${GIT_EXECUTABLE} -C "${PACKAGE_DIR}/src" rev-parse HEAD
         OUTPUT "5a80d2080c808f588856c3191512ea677eede6ee")
     endsection()
+
+    section("it should download only the latest change")
+      find_package(Git REQUIRED)
+      assert_execute_process(
+        COMMAND ${GIT_EXECUTABLE} -C "${PACKAGE_DIR}/src" rev-list --count HEAD
+        OUTPUT "1")
+    endsection()
   endsection()
 endfunction()
 
@@ -45,6 +52,13 @@ section("it should redownload an external package with a different version")
       COMMAND ${GIT_EXECUTABLE} -C "${PACKAGE_DIR}/src" rev-parse HEAD
       OUTPUT "316dec51ce6bfd7647d3e68d4cb2512a59a49682")
   endsection()
+
+  section("it should download only the latest change")
+    find_package(Git REQUIRED)
+    assert_execute_process(
+      COMMAND ${GIT_EXECUTABLE} -C "${PACKAGE_DIR}/src" rev-list --count HEAD
+      OUTPUT "1")
+  endsection()
 endsection()
 
 section(
@@ -66,7 +80,7 @@ section("it should not redownload an external package")
 
   set(GIT_EXECUTABLE "${PREV_GIT_EXECUTABLE}")
 
-  section("it should keep the correct path")
+  section("it should maintain the correct path")
     assert(DEFINED ProjectStarter_SOURCE_DIR)
     assert(EXISTS "${ProjectStarter_SOURCE_DIR}")
 
@@ -74,10 +88,17 @@ section("it should not redownload an external package")
     assert(ProjectStarter_SOURCE_DIR STREQUAL "${PACKAGE_DIR}/src")
   endsection()
 
-  section("it should keep the correct version")
+  section("it should maintain the correct version")
     find_package(Git REQUIRED)
     assert_execute_process(
       COMMAND ${GIT_EXECUTABLE} -C "${PACKAGE_DIR}/src" rev-parse HEAD
       OUTPUT "5a80d2080c808f588856c3191512ea677eede6ee")
+  endsection()
+
+  section("it should maintain only the latest change")
+    find_package(Git REQUIRED)
+    assert_execute_process(
+      COMMAND ${GIT_EXECUTABLE} -C "${PACKAGE_DIR}/src" rev-list --count HEAD
+      OUTPUT "1")
   endsection()
 endsection()

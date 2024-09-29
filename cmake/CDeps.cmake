@@ -75,7 +75,7 @@ function(cdeps_download_package NAME URL REF)
 
   message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
   execute_process(
-    COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" "${GIT_URL}"
+    COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" --depth 1 "${GIT_URL}"
       ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
