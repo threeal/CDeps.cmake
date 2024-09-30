@@ -56,18 +56,25 @@ endfunction()
 
 # Downloads the source files of an external package.
 #
-# cdeps_download_package(<name> <url> <ref>)
+# cdeps_download_package(<name> <url> <ref> [RECURSE_SUBMODULES])
 #
 # This function downloads the source files of an external package named `<name>`
 # using Git. It downloads the source files from the specified `<url>` with a
 # particular `<ref>`. The `<ref>` can be a branch, tag, or commit hash.
 #
+# If the `RECURSE_SUBMODULES` option is specified, the external package will be
+# downloaded along with its submodules recursively.
+#
 # This function outputs the `<name>_SOURCE_DIR` variable, which contains the
 # path to the downloaded source files of the external package.
 function(cdeps_download_package NAME URL REF)
+  cmake_parse_arguments(PARSE_ARGV 3 ARG RECURSE_SUBMODULES "" "")
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
   set(SOURCE_LOCK "${NAME} ${URL} ${REF}")
+  if(ARG_RECURSE_SUBMODULES)
+    string(APPEND SOURCE_LOCK " RECURSE_SUBMODULES")
+  endif()
 
   # Check if the lock file is valid; redownload the source files if it isn't.
   if(EXISTS ${PACKAGE_DIR}/src.lock)
@@ -92,9 +99,14 @@ function(cdeps_download_package NAME URL REF)
 
   cdeps_resolve_package_url("${URL}" GIT_URL)
 
+  set(CLONE_OPTS -b "${REF}" --depth 1)
+  if(ARG_RECURSE_SUBMODULES)
+    list(APPEND CLONE_OPTS --recurse-submodules)
+  endif()
+
   message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
   execute_process(
-    COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" --depth 1 "${GIT_URL}"
+    COMMAND "${GIT_EXECUTABLE}" clone ${CLONE_OPTS} "${GIT_URL}"
       ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
