@@ -75,8 +75,14 @@ endfunction()
 
 test_generate_and_build_external_package()
 
-section("it should rebuild an external package with a different options")
-  cdeps_build_package(Sample GENERATOR Ninja OPTIONS BUILD_MARS=ON)
+section("it should rebuild an external package with the same generator as the"
+  " parent project")
+
+  set(CMAKE_GENERATOR Ninja)
+
+  cdeps_build_package(Sample)
+
+  unset(CMAKE_GENERATOR)
 
   section("it should rebuild in the correct path")
     assert(DEFINED Sample_BUILD_DIR)
@@ -93,8 +99,52 @@ section("it should rebuild an external package with a different options")
     assert(EXISTS ${SAMPLE_PACKAGE_DIR}/build/earth)
     assert_execute_process(COMMAND ${SAMPLE_PACKAGE_DIR}/build/earth)
 
+    assert(NOT EXISTS ${SAMPLE_PACKAGE_DIR}/build/mars)
+  endsection()
+endsection()
+
+section("it should rebuild an external package with a different options")
+  cdeps_build_package(Sample OPTIONS BUILD_MARS=ON)
+
+  section("it should rebuild in the correct path")
+    assert(DEFINED Sample_BUILD_DIR)
+    assert(EXISTS "${Sample_BUILD_DIR}")
+
+    assert(Sample_BUILD_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/build)
+  endsection()
+
+  section("it should use the correct build system generator")
+    assert(NOT EXISTS ${Sample_BUILD_DIR}/build.ninja)
+  endsection()
+
+  section("it should rebuild the correct targets")
+    assert(EXISTS ${SAMPLE_PACKAGE_DIR}/build/earth)
+    assert_execute_process(COMMAND ${SAMPLE_PACKAGE_DIR}/build/earth)
+
     assert(EXISTS ${SAMPLE_PACKAGE_DIR}/build/mars)
     assert_execute_process(COMMAND ${SAMPLE_PACKAGE_DIR}/build/mars)
+  endsection()
+endsection()
+
+section("it should rebuild an external package with a different generator")
+  cdeps_build_package(Sample GENERATOR Ninja)
+
+  section("it should rebuild in the correct path")
+    assert(DEFINED Sample_BUILD_DIR)
+    assert(EXISTS "${Sample_BUILD_DIR}")
+
+    assert(Sample_BUILD_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/build)
+  endsection()
+
+  section("it should use the correct build system generator")
+    assert(EXISTS ${Sample_BUILD_DIR}/build.ninja)
+  endsection()
+
+  section("it should rebuild the correct targets")
+    assert(EXISTS ${SAMPLE_PACKAGE_DIR}/build/earth)
+    assert_execute_process(COMMAND ${SAMPLE_PACKAGE_DIR}/build/earth)
+
+    assert(NOT EXISTS ${SAMPLE_PACKAGE_DIR}/build/mars)
   endsection()
 endsection()
 

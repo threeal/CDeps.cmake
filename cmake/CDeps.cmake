@@ -132,7 +132,8 @@ endfunction()
 #
 # If the `GENERATOR` option is specified, the package will be built using the
 # `<generator>` build system generator. Otherwise, it will be built using the
-# default build system generator, which is platform-specific.
+# same build system generator as the main project, specified by the
+# `CMAKE_GENERATOR` variable.
 #
 # If the `OPTIONS` option is specified, an additional variable specified in each
 # `<options>...` will be defined for building the package. The `<options>...`
@@ -143,6 +144,10 @@ endfunction()
 # to the built external package.
 function(cdeps_build_package NAME)
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" GENERATOR OPTIONS)
+
+  if(NOT DEFINED ARG_GENERATOR AND DEFINED CMAKE_GENERATOR)
+    set(ARG_GENERATOR "${CMAKE_GENERATOR}")
+  endif()
 
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
   if(NOT EXISTS ${PACKAGE_DIR}/src.lock)
