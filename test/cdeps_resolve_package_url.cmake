@@ -1,4 +1,4 @@
-find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
 section("it should resolve a package URL that contains an HTTP protocol")
   cdeps_resolve_package_url(http://github.com/threeal/cpp-starter OUTPUT)

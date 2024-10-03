@@ -1,4 +1,4 @@
-find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
 set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
 file(REMOVE_RECURSE "${CDEPS_ROOT}")
