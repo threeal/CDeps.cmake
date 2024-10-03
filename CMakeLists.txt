@@ -36,7 +36,7 @@ if(CDEPS_ENABLE_INSTALL)
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
     cmake/CDepsConfigVersion.cmake
-    COMPATIBILITY SameMajorVersion
+    COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT
   )
 
   install(
