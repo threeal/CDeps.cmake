@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include_guard(GLOBAL)
-
 # Retrieves the path of a package directory.
 #
 # cdeps_get_package_dir(<name> <output_dir>)
