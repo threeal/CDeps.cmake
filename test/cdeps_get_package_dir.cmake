@@ -1,4 +1,4 @@
-find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
 set(CMAKE_SOURCE_DIR source-dir)
 

@@ -12,7 +12,7 @@ jobs:
       - name: Setup Ninja
         run: sudo apt-get install -y ninja-build
 
-      - name: Checkout
+      - name: Checkout Project
         uses: actions/checkout@v4.2.0
 
       - name: Configure Project
@@ -23,3 +23,5 @@ jobs:
 
       - name: Test Project
         uses: threeal/ctest-action@v1.1.0
+        with:
+          verbose: true

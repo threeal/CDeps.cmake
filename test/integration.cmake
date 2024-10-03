@@ -22,7 +22,7 @@ section("it should regenerate the source code of the test project")
     "cmake_minimum_required(VERSION 3.5)\n"
     "project(Poject LANGUAGES CXX)\n"
     "\n"
-    "find_package(CDeps REQUIRED PATHS ${CMAKE_CURRENT_LIST_DIR}/../cmake)\n"
+    "include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)\n"
     "\n"
     "cdeps_download_package(CppStarter github.com/threeal/cpp-starter main)\n"
     "cdeps_build_package(CppStarter)\n"
