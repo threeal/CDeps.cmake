@@ -35,7 +35,7 @@ endif()
 if(CDEPS_ENABLE_INSTALL)
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-    CDepsConfigVersion.cmake
+    cmake/CDepsConfigVersion.cmake
     COMPATIBILITY SameMajorVersion
   )
 
@@ -43,7 +43,7 @@ if(CDEPS_ENABLE_INSTALL)
     FILES
       cmake/CDeps.cmake
       cmake/CDepsConfig.cmake
-      ${CMAKE_CURRENT_BINARY_DIR}/CDepsConfigVersion.cmake
+      ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfigVersion.cmake
     DESTINATION lib/cmake/CDeps
   )
 endif()
