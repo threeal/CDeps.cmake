@@ -108,8 +108,7 @@ function(cdeps_download_package NAME URL REF)
       ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
-    OUTPUT_QUIET
-  )
+    OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
     message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
@@ -187,8 +186,7 @@ function(cdeps_build_package NAME)
       ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
-    OUTPUT_QUIET
-  )
+    OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
     message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
@@ -200,8 +198,7 @@ function(cdeps_build_package NAME)
     COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
-    OUTPUT_QUIET
-  )
+    OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
     message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
@@ -251,8 +248,7 @@ function(cdeps_install_package NAME)
       --prefix ${PACKAGE_DIR}/install
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
-    OUTPUT_QUIET
-  )
+    OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
     message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")

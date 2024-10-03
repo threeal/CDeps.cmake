@@ -5,8 +5,7 @@ project(
   VERSION 0.0.0
   DESCRIPTION "Build and install missing dependencies in your CMake project"
   HOMEPAGE_URL https://github.com/threeal/CDeps.cmake
-  LANGUAGES NONE
-)
+  LANGUAGES NONE)
 
 option(CDEPS_ENABLE_TESTS "Enable test targets.")
 option(CDEPS_ENABLE_INSTALL "Enable install targets." ${PROJECT_IS_TOP_LEVEL})
@@ -34,16 +33,12 @@ endif()
 
 if(CDEPS_ENABLE_INSTALL)
   include(CMakePackageConfigHelpers)
-  write_basic_package_version_file(
-    cmake/CDepsConfigVersion.cmake
-    COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT
-  )
+  write_basic_package_version_file(cmake/CDepsConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
 
   install(
-    FILES
-      cmake/CDeps.cmake
+    FILES cmake/CDeps.cmake
       cmake/CDepsConfig.cmake
       ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfigVersion.cmake
-    DESTINATION lib/cmake/CDeps
-  )
+    DESTINATION lib/cmake/CDeps)
 endif()
