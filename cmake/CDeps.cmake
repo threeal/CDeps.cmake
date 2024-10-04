@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # This variable contains the version of the included `CDeps.cmake` module.
-set(CDEPS_VERSION 0.0.0)
+set(CDEPS_VERSION 0.1.0)
 
 # Retrieves the path of a package directory.
 #
