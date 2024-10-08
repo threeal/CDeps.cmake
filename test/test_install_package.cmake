@@ -1,10 +1,10 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/assert_helper.cmake)
 
+set(CMAKE_SOURCE_DIR "root")
 set(CMAKE_GENERATOR "Unix Makefiles")
 
-set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
-file(REMOVE_RECURSE "${CDEPS_ROOT}")
+file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
 
 cdeps_get_package_dir(Sample PACKAGE_DIR)
 set(Sample_SOURCE_DIR ${PACKAGE_DIR}/src)
@@ -130,4 +130,4 @@ section("it should reinstall an external package")
   unset(Sample_INSTALL_DIR)
 endsection()
 
-file(REMOVE_RECURSE "${CDEPS_ROOT}")
+file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")

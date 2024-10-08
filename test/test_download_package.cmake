@@ -1,8 +1,8 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/assert_helper.cmake)
 
-set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
-file(REMOVE_RECURSE "${CDEPS_ROOT}")
+set(CMAKE_SOURCE_DIR "root")
+file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
 
 section(
   "it should fail to download an external package with an invalid URL")
@@ -118,4 +118,4 @@ section("it should redownload an external package with submodules")
   unset(GitSubmoduleExample_SOURCE_DIR)
 endsection()
 
-file(REMOVE_RECURSE "${CDEPS_ROOT}")
+file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}")
