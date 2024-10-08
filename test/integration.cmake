@@ -56,7 +56,8 @@ section("it should configure the build of the test project")
 endsection()
 
 section("it should build the test project")
-  assert_execute_process("${CMAKE_COMMAND}" --build project/build)
+  assert_execute_process(
+    "${CMAKE_COMMAND}" --build project/build --config Release)
 endsection()
 
 section("it should run the test project")
