@@ -198,7 +198,7 @@ function(cdeps_build_package NAME)
 
   message(STATUS "CDeps: Building ${NAME}")
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
+    COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build --config Release
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
