@@ -1,13 +1,23 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/assert_helper.cmake)
+
+set(CMAKE_GENERATOR "Unix Makefiles")
 
 set(CDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/.cdeps)
 file(REMOVE_RECURSE "${CDEPS_ROOT}")
 
-cdeps_get_package_dir(Sample SAMPLE_PACKAGE_DIR)
+cdeps_get_package_dir(Sample PACKAGE_DIR)
+set(Sample_SOURCE_DIR ${PACKAGE_DIR}/src)
+
+section("it should fail to install an external package that has not been built")
+  assert_fatal_error(
+    CALL cdeps_install_package Sample
+    MESSAGE "CDeps: Sample must be built before installation")
+endsection()
 
 section("it should generate external package source files")
   file(
-    WRITE ${SAMPLE_PACKAGE_DIR}/src/CMakeLists.txt
+    WRITE ${Sample_SOURCE_DIR}/CMakeLists.txt
     "cmake_minimum_required(VERSION 3.5)\n"
     "project(Sample LANGUAGES CXX)\n"
     "\n"
@@ -22,7 +32,7 @@ section("it should generate external package source files")
     "endif()\n")
 
   file(
-    WRITE ${SAMPLE_PACKAGE_DIR}/src/earth.cpp
+    WRITE ${Sample_SOURCE_DIR}/earth.cpp
     "#include <iostream>\n"
     "\n"
     "int main() {\n"
@@ -30,7 +40,7 @@ section("it should generate external package source files")
     "}\n")
 
   file(
-    WRITE ${SAMPLE_PACKAGE_DIR}/src/mars.cpp
+    WRITE ${Sample_SOURCE_DIR}/mars.cpp
     "#include <iostream>\n"
     "\n"
     "int main() {\n"
@@ -38,61 +48,71 @@ section("it should generate external package source files")
     "}\n")
 
   file(
-    WRITE ${SAMPLE_PACKAGE_DIR}/src.lock
+    WRITE ${Sample_SOURCE_DIR}.lock
     "Sample github.com/user/sample main")
-
-  set(Sample_SOURCE_DIR ${SAMPLE_PACKAGE_DIR}/src)
 endsection()
 
-section("it should fail to install an external package that has not been built")
+section("it should build an external package")
+  cdeps_build_package(Sample)
+endsection()
+
+section("it should fail to install a corrupted external package")
+  file(READ ${Sample_BUILD_DIR}/cmake_install.cmake
+    ORIGINAL_CMAKE_INSTALL_CMAKE)
+
+  file(WRITE ${Sample_BUILD_DIR}/cmake_install.cmake corrupted)
+
   assert_fatal_error(
     CALL cdeps_install_package Sample
-    MESSAGE "CDeps: Sample must be built before installation")
+    MESSAGE "CDeps: Failed to install Sample:")
+
+  file(WRITE ${Sample_BUILD_DIR}/cmake_install.cmake
+    "${ORIGINAL_CMAKE_INSTALL_CMAKE}")
 endsection()
 
-function(test_build_and_install_external_package)
-  section("it should build an external package")
-    cdeps_build_package(Sample)
+section("it should install an external package")
+  cdeps_install_package(Sample)
+
+  section("it should install to the correct path")
+    assert_cdeps_package_install_dir(Sample)
   endsection()
 
-  section("it should install an external package")
-    unset(Sample_INSTALL_DIR)
-    cdeps_install_package(Sample)
+  section("it should install the correct targets")
+    assert(EXISTS ${Sample_INSTALL_DIR}/bin/earth)
+    assert_execute_process(
+      COMMAND ${Sample_INSTALL_DIR}/bin/earth
+      OUTPUT "Hello Earth!")
 
-    section("it should install to the correct path")
-      assert(DEFINED Sample_INSTALL_DIR)
-      assert(EXISTS "${Sample_INSTALL_DIR}")
-
-      assert(Sample_INSTALL_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/install)
-    endsection()
-
-    section("it should install the correct targets")
-      assert(EXISTS ${Sample_INSTALL_DIR}/bin/earth)
-      assert_execute_process(
-        COMMAND ${Sample_INSTALL_DIR}/bin/earth
-        OUTPUT "Hello Earth!")
-
-      assert(NOT EXISTS ${Sample_INSTALL_DIR}/bin/mars)
-    endsection()
+    assert(NOT EXISTS ${Sample_INSTALL_DIR}/bin/mars)
   endsection()
-endfunction()
 
-test_build_and_install_external_package()
+  unset(Sample_INSTALL_DIR)
+endsection()
+
+section("it should not reinstall an external package")
+  set(PREV_CMAKE_COMMAND "${CMAKE_COMMAND}")
+  set(CMAKE_COMMAND invalid)
+
+  cdeps_install_package(Sample)
+
+  set(CMAKE_COMMAND "${PREV_CMAKE_COMMAND}")
+
+  section("it should maintain the correct path")
+    assert_cdeps_package_install_dir(Sample)
+  endsection()
+
+  unset(Sample_INSTALL_DIR)
+endsection()
 
 section("it should rebuild an external package with different options")
   cdeps_build_package(Sample OPTIONS BUILD_MARS=ON)
 endsection()
 
 section("it should reinstall an external package")
-  unset(Sample_INSTALL_DIR)
-
   cdeps_install_package(Sample)
 
   section("it should reinstall to the correct path")
-    assert(DEFINED Sample_INSTALL_DIR)
-    assert(EXISTS "${Sample_INSTALL_DIR}")
-
-    assert(Sample_INSTALL_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/install)
+    assert_cdeps_package_install_dir(Sample)
   endsection()
 
   section("it should reinstall the correct targets")
@@ -106,40 +126,8 @@ section("it should reinstall an external package")
       COMMAND ${Sample_INSTALL_DIR}/bin/mars
       OUTPUT "Hello Mars!")
   endsection()
+
+  unset(Sample_INSTALL_DIR)
 endsection()
 
-section("it should fail to install a corrupted external package")
-  file(REMOVE ${SAMPLE_PACKAGE_DIR}/build/cmake_install.cmake)
-  file(WRITE ${SAMPLE_PACKAGE_DIR}/build.lock corrupted)
-
-  assert_fatal_error(
-    CALL cdeps_install_package Sample
-    MESSAGE "CDeps: Failed to install Sample:")
-endsection()
-
-test_build_and_install_external_package()
-
-section("it should not reinstall an external package")
-  set(PREV_CMAKE_COMMAND "${CMAKE_COMMAND}")
-  set(CMAKE_COMMAND invalid)
-
-  cdeps_install_package(Sample)
-
-  set(CMAKE_COMMAND "${PREV_CMAKE_COMMAND}")
-
-  section("it should maintain to the correct path")
-    assert(DEFINED Sample_INSTALL_DIR)
-    assert(EXISTS "${Sample_INSTALL_DIR}")
-
-    assert(Sample_INSTALL_DIR STREQUAL ${SAMPLE_PACKAGE_DIR}/install)
-  endsection()
-
-  section("it should maintain the correct targets")
-    assert(EXISTS ${Sample_INSTALL_DIR}/bin/earth)
-    assert_execute_process(
-      COMMAND ${Sample_INSTALL_DIR}/bin/earth
-      OUTPUT "Hello Earth!")
-
-    assert(NOT EXISTS ${Sample_INSTALL_DIR}/bin/mars)
-  endsection()
-endsection()
+file(REMOVE_RECURSE "${CDEPS_ROOT}")
