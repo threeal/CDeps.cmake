@@ -20,7 +20,7 @@ section("it should build a package with the default generator")
 endsection()
 
 section("it should fail to rebuild the package "
-  "because of an invalid parent generator")
+  "because of an invalid main project generator")
   block()
     set(CMAKE_GENERATOR invalid)
     assert_fatal_error(
@@ -33,7 +33,7 @@ section("it should fail to rebuild the package "
   endsection()
 endsection()
 
-section("it should rebuild the package with the parent generator")
+section("it should rebuild the package with the main project generator")
   block()
     set(CMAKE_GENERATOR "Unix Makefiles")
     cdeps_build_package(pkg)
@@ -54,6 +54,7 @@ endsection()
 section("it should fail to rebuild the package "
   "because of an invalid specified generator")
   block()
+    set(CMAKE_GENERATOR "Unix Makefiles")
     assert_fatal_error(
       CALL cdeps_build_package pkg GENERATOR invalid
       MESSAGE "CDeps: Failed to configure pkg:")
@@ -65,7 +66,10 @@ section("it should fail to rebuild the package "
 endsection()
 
 section("it should rebuild the package with the specified generator")
-  cdeps_build_package(pkg GENERATOR "Unix Makefiles")
+  block()
+    set(CMAKE_GENERATOR invalid)
+    cdeps_build_package(pkg GENERATOR "Unix Makefiles")
+  endblock()
 
   section("it should regenerate the lock file")
     file(READ .cdeps/pkg/build.lock CONTENT)
