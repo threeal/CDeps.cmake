@@ -9,9 +9,6 @@ jobs:
     name: Test Project
     runs-on: ubuntu-22.04
     steps:
-      - name: Setup Ninja
-        run: sudo apt-get install -y ninja-build
-
       - name: Checkout Project
         uses: actions/checkout@v4.2.0
 
