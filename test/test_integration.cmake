@@ -13,8 +13,8 @@ endsection()
 
 section("it should fail to configure the build due to missing dependencies")
   assert_execute_process(
-    COMMAND "${CMAKE_COMMAND}" -B project/build project
-    ERROR "Could not find a package configuration file provided by \"MyFibonacci\"")
+    COMMAND "${CMAKE_COMMAND}" -G "Unix Makefiles" -S project -B project/build
+    ERROR "Could not find a package configuration file")
 endsection()
 
 section("it should regenerate the source code of the test project")

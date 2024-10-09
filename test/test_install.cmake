@@ -48,7 +48,14 @@ section("it should install a package")
   endsection()
 
   section("it should install the correct targets")
-    assert_execute_process(.cdeps/pkg/install/bin/main OUTPUT "Hello World!")
+    if(EXISTS .cdeps/pkg/install/bin/main)
+      assert_execute_process(.cdeps/pkg/install/bin/main OUTPUT "Hello World!")
+    elseif(EXISTS .cdeps/pkg/install/bin/main.exe)
+      assert_execute_process(
+        .cdeps/pkg/install/bin/main.exe OUTPUT "Hello World!")
+    else()
+      fail("expected path" .cdeps/pkg/install/bin/main "to exist")
+    endif()
   endsection()
 endsection()
 
