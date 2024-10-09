@@ -41,20 +41,6 @@ function(cdeps_get_package_dir NAME OUTPUT_DIR)
   endif()
 endfunction()
 
-# Resolves the given package URL to a valid URL.
-#
-# cdeps_resolve_package_url(<url> <output_url>)
-#
-# This function resolves the given `<url>` to a valid URL and outputs it to the
-# `<output_url>` variable.
-function(cdeps_resolve_package_url URL OUTPUT_URL)
-  if(URL MATCHES ".*://")
-    set("${OUTPUT_URL}" "${URL}" PARENT_SCOPE)
-  else()
-    set("${OUTPUT_URL}" https://${URL} PARENT_SCOPE)
-  endif()
-endfunction()
-
 # Downloads the source files of an external package.
 #
 # cdeps_download_package(<name> <url> <ref> [RECURSE_SUBMODULES])
