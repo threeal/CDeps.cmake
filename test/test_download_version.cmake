@@ -2,7 +2,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
 find_package(Git REQUIRED QUIET)
 
-set(CDEPS_ROOT .cdeps)
+set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
 
 section("it should download a package with a specific version")

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
-set(CDEPS_ROOT .cdeps)
+set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
 
 file(WRITE .cdeps/pkg/src/CMakeLists.txt
