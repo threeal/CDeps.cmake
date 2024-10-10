@@ -23,6 +23,11 @@
 # This variable contains the version of the included `CDeps.cmake` module.
 set(CDEPS_VERSION 0.1.0)
 
+# This variable contains the root directory for storing external packages.
+if(NOT DEFINED CDEPS_ROOT)
+  set(CDEPS_ROOT "${CMAKE_SOURCE_DIR}/.cdeps")
+endif()
+
 # Retrieves the path of a package directory.
 #
 # cdeps_get_package_dir(<name> <output_dir>)
