@@ -4,7 +4,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
 set(CMAKE_GENERATOR "Unix Makefiles")
 
-set(CDEPS_ROOT .cdeps)
+set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
 
 section("it should fail to build a package "
