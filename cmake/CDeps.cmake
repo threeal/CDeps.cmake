@@ -135,10 +135,15 @@ endfunction()
 # same build system generator as the main project, specified by the
 # `CMAKE_GENERATOR` variable.
 #
-# If the `OPTIONS` option is specified, an additional variable specified in each
+# If the `OPTIONS` option is specified, additional variables specified in each
 # `<options>...` will be defined for building the package. The `<options>...`
 # must be in the format `NAME=VALUE`, where `NAME` is the variable name and
 # `VALUE` is the variable value.
+#
+# If the `CMAKE_BUILD_TYPE` variable is defined in the main project but not
+# specified in `<options>...`, it will append that variable to `<options>...`,
+# making the package be built using the same build type as the main project by
+# default.
 #
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
 # to the built external package.
@@ -147,6 +152,15 @@ function(cdeps_build_package NAME)
 
   if(NOT DEFINED ARG_GENERATOR AND DEFINED CMAKE_GENERATOR)
     set(ARG_GENERATOR "${CMAKE_GENERATOR}")
+  endif()
+
+  foreach(OPTION IN LISTS ARG_OPTIONS)
+    string(REGEX REPLACE "=.*" "" OPTION "${OPTION}")
+    list(APPEND OPTIONS_NAMES "${OPTION}")
+  endforeach()
+
+  if(DEFINED CMAKE_BUILD_TYPE AND NOT "CMAKE_BUILD_TYPE" IN_LIST OPTIONS_NAMES)
+    list(APPEND ARG_OPTIONS CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
   endif()
 
   cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
