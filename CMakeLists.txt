@@ -32,7 +32,6 @@ if(CDEPS_ENABLE_TESTS)
   assertion_add_test(test/test_download.cmake)
   assertion_add_test(test/test_install.cmake)
   assertion_add_test(test/test_integration.cmake)
-  assertion_add_test(test/test_utilities.cmake)
 endif()
 
 if(CDEPS_ENABLE_INSTALL)

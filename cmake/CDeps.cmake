@@ -23,23 +23,10 @@
 # This variable contains the version of the included `CDeps.cmake` module.
 set(CDEPS_VERSION 0.1.0)
 
-# Retrieves the path of a package directory.
-#
-# cdeps_get_package_dir(<name> <output_dir>)
-#
-# This function retrieves the directory path of a package named `<name>` and
-# stores it in the `<output_dir>` variable.
-#
-# If the `CDEPS_ROOT` variable is defined, it will locate the package directory
-# under that variable. Otherwise, it will locate the package directory under the
-# `.cdeps` directory of the project's source directory.
-function(cdeps_get_package_dir NAME OUTPUT_DIR)
-  if(DEFINED CDEPS_ROOT)
-    set("${OUTPUT_DIR}" ${CDEPS_ROOT}/${NAME} PARENT_SCOPE)
-  else()
-    set("${OUTPUT_DIR}" ${CMAKE_SOURCE_DIR}/.cdeps/${NAME} PARENT_SCOPE)
-  endif()
-endfunction()
+# This variable contains the root directory for storing external packages.
+if(NOT DEFINED CDEPS_ROOT)
+  set(CDEPS_ROOT "${CMAKE_SOURCE_DIR}/.cdeps")
+endif()
 
 # Downloads the source files of an external package.
 #
@@ -58,7 +45,6 @@ endfunction()
 # path to the downloaded source files of the external package.
 function(cdeps_download_package NAME URL REF)
   cmake_parse_arguments(PARSE_ARGV 3 ARG RECURSE_SUBMODULES "" "")
-  cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
 
   set(SOURCE_LOCK "${NAME} ${URL} ${REF}")
   if(ARG_RECURSE_SUBMODULES)
@@ -66,15 +52,15 @@ function(cdeps_download_package NAME URL REF)
   endif()
 
   # Check if the lock file is valid; redownload the source files if it isn't.
-  if(EXISTS ${PACKAGE_DIR}/src.lock)
-    file(READ ${PACKAGE_DIR}/src.lock LOCK)
+  if(EXISTS ${CDEPS_ROOT}/${NAME}/src.lock)
+    file(READ ${CDEPS_ROOT}/${NAME}/src.lock LOCK)
     if(LOCK STREQUAL SOURCE_LOCK)
       message(STATUS "CDeps: Using existing ${NAME} source files")
-      set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
+      set(${NAME}_SOURCE_DIR ${CDEPS_ROOT}/${NAME}/src PARENT_SCOPE)
       return()
     else()
-      file(REMOVE ${PACKAGE_DIR}/src.lock)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
+      file(REMOVE ${CDEPS_ROOT}/${NAME}/src.lock)
+      file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/src)
     endif()
   endif()
 
@@ -94,18 +80,18 @@ function(cdeps_download_package NAME URL REF)
   message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" clone ${CLONE_OPTS} https://${URL}.git
-      ${PACKAGE_DIR}/src
+      ${CDEPS_ROOT}/${NAME}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${PACKAGE_DIR}/src)
+    file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/src)
     message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
     return()
   endif()
 
-  file(WRITE ${PACKAGE_DIR}/src.lock "${SOURCE_LOCK}")
-  set(${NAME}_SOURCE_DIR ${PACKAGE_DIR}/src PARENT_SCOPE)
+  file(WRITE ${CDEPS_ROOT}/${NAME}/src.lock "${SOURCE_LOCK}")
+  set(${NAME}_SOURCE_DIR ${CDEPS_ROOT}/${NAME}/src PARENT_SCOPE)
 endfunction()
 
 # Builds an external package.
@@ -149,13 +135,12 @@ function(cdeps_build_package NAME)
     list(APPEND ARG_OPTIONS CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
   endif()
 
-  cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
-  if(NOT EXISTS ${PACKAGE_DIR}/src.lock)
+  if(NOT EXISTS ${CDEPS_ROOT}/${NAME}/src.lock)
     message(FATAL_ERROR "CDeps: ${NAME} must be downloaded before building")
     return()
   endif()
 
-  file(READ ${PACKAGE_DIR}/src.lock SOURCE_LOCK)
+  file(READ ${CDEPS_ROOT}/${NAME}/src.lock SOURCE_LOCK)
   set(BUILD_LOCK "${SOURCE_LOCK}")
   if(DEFINED ARG_GENERATOR)
     string(APPEND BUILD_LOCK " GENERATOR ${ARG_GENERATOR}")
@@ -165,15 +150,15 @@ function(cdeps_build_package NAME)
   endif()
 
   # Check if the lock file is valid; rebuild the package if it isn't.
-  if(EXISTS ${PACKAGE_DIR}/build.lock)
-    file(READ ${PACKAGE_DIR}/build.lock LOCK)
+  if(EXISTS ${CDEPS_ROOT}/${NAME}/build.lock)
+    file(READ ${CDEPS_ROOT}/${NAME}/build.lock LOCK)
     if(LOCK STREQUAL BUILD_LOCK)
       message(STATUS "CDeps: Using existing ${NAME} build")
-      set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
+      set(${NAME}_BUILD_DIR ${CDEPS_ROOT}/${NAME}/build PARENT_SCOPE)
       return()
     else()
-      file(REMOVE ${PACKAGE_DIR}/build.lock)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+      file(REMOVE ${CDEPS_ROOT}/${NAME}/build.lock)
+      file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/build)
     endif()
   endif()
 
@@ -185,31 +170,31 @@ function(cdeps_build_package NAME)
     list(APPEND CONFIGURE_ARGS -D "${OPTION}")
   endforeach()
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" -B ${PACKAGE_DIR}/build ${CONFIGURE_ARGS}
-      ${PACKAGE_DIR}/src
+    COMMAND "${CMAKE_COMMAND}" -B ${CDEPS_ROOT}/${NAME}/build ${CONFIGURE_ARGS}
+      ${CDEPS_ROOT}/${NAME}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+    file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/build)
     message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
     return()
   endif()
 
   message(STATUS "CDeps: Building ${NAME}")
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" --build ${PACKAGE_DIR}/build
+    COMMAND "${CMAKE_COMMAND}" --build ${CDEPS_ROOT}/${NAME}/build
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${PACKAGE_DIR}/build)
+    file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/build)
     message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
     return()
   endif()
 
-  file(WRITE ${PACKAGE_DIR}/build.lock "${BUILD_LOCK}")
-  set(${NAME}_BUILD_DIR ${PACKAGE_DIR}/build PARENT_SCOPE)
+  file(WRITE ${CDEPS_ROOT}/${NAME}/build.lock "${BUILD_LOCK}")
+  set(${NAME}_BUILD_DIR ${CDEPS_ROOT}/${NAME}/build PARENT_SCOPE)
 endfunction()
 
 # Installs an external package.
@@ -223,41 +208,40 @@ endfunction()
 # This function outputs the `<name>_INSTALL_DIR` variable, which contains the
 # path to the installed external package.
 function(cdeps_install_package NAME)
-  cdeps_get_package_dir("${NAME}" PACKAGE_DIR)
-  if(NOT EXISTS ${PACKAGE_DIR}/build.lock)
+  if(NOT EXISTS ${CDEPS_ROOT}/${NAME}/build.lock)
     message(FATAL_ERROR "CDeps: ${NAME} must be built before installation")
     return()
   endif()
 
-  file(READ ${PACKAGE_DIR}/build.lock BUILD_LOCK)
+  file(READ ${CDEPS_ROOT}/${NAME}/build.lock BUILD_LOCK)
   set(INSTALL_LOCK "${BUILD_LOCK}")
 
   # Check if the lock file is valid; reinstall the package if it isn't.
-  if(EXISTS ${PACKAGE_DIR}/install.lock)
-    file(READ ${PACKAGE_DIR}/install.lock LOCK)
+  if(EXISTS ${CDEPS_ROOT}/${NAME}/install.lock)
+    file(READ ${CDEPS_ROOT}/${NAME}/install.lock LOCK)
     if(LOCK STREQUAL INSTALL_LOCK)
       message(STATUS "CDeps: Using existing ${NAME} installation")
-      set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
+      set(${NAME}_INSTALL_DIR ${CDEPS_ROOT}/${NAME}/install PARENT_SCOPE)
       return()
     else()
-      file(REMOVE ${PACKAGE_DIR}/install.lock)
-      file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
+      file(REMOVE ${CDEPS_ROOT}/${NAME}/install.lock)
+      file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/install)
     endif()
   endif()
 
   message(STATUS "CDeps: Installing ${NAME}")
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" --install ${PACKAGE_DIR}/build
-      --prefix ${PACKAGE_DIR}/install
+    COMMAND "${CMAKE_COMMAND}" --install ${CDEPS_ROOT}/${NAME}/build
+      --prefix ${CDEPS_ROOT}/${NAME}/install
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${PACKAGE_DIR}/install)
+    file(REMOVE_RECURSE ${CDEPS_ROOT}/${NAME}/install)
     message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")
     return()
   endif()
 
-  file(WRITE ${PACKAGE_DIR}/install.lock "${INSTALL_LOCK}")
-  set(${NAME}_INSTALL_DIR ${PACKAGE_DIR}/install PARENT_SCOPE)
+  file(WRITE ${CDEPS_ROOT}/${NAME}/install.lock "${INSTALL_LOCK}")
+  set(${NAME}_INSTALL_DIR ${CDEPS_ROOT}/${NAME}/install PARENT_SCOPE)
 endfunction()
