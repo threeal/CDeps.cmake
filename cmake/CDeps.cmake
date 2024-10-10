@@ -41,27 +41,15 @@ function(cdeps_get_package_dir NAME OUTPUT_DIR)
   endif()
 endfunction()
 
-# Resolves the given package URL to a valid URL.
-#
-# cdeps_resolve_package_url(<url> <output_url>)
-#
-# This function resolves the given `<url>` to a valid URL and outputs it to the
-# `<output_url>` variable.
-function(cdeps_resolve_package_url URL OUTPUT_URL)
-  if(URL MATCHES ".*://")
-    set("${OUTPUT_URL}" "${URL}" PARENT_SCOPE)
-  else()
-    set("${OUTPUT_URL}" https://${URL} PARENT_SCOPE)
-  endif()
-endfunction()
-
 # Downloads the source files of an external package.
 #
 # cdeps_download_package(<name> <url> <ref> [RECURSE_SUBMODULES])
 #
 # This function downloads the source files of an external package named `<name>`
 # using Git. It downloads the source files from the specified `<url>` with a
-# particular `<ref>`. The `<ref>` can be a branch, tag, or commit hash.
+# particular `<ref>`. The `<url>` must be specified without a protocol (e.g.,
+# `github.com/user/repo`), while the `<ref>` can be a branch, tag, or commit
+# hash.
 #
 # If the `RECURSE_SUBMODULES` option is specified, the external package will be
 # downloaded along with its submodules recursively.
@@ -98,8 +86,6 @@ function(cdeps_download_package NAME URL REF)
     endif()
   endif()
 
-  cdeps_resolve_package_url("${URL}" GIT_URL)
-
   set(CLONE_OPTS -b "${REF}" --depth 1)
   if(ARG_RECURSE_SUBMODULES)
     list(APPEND CLONE_OPTS --recurse-submodules)
@@ -107,7 +93,7 @@ function(cdeps_download_package NAME URL REF)
 
   message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
   execute_process(
-    COMMAND "${GIT_EXECUTABLE}" clone ${CLONE_OPTS} "${GIT_URL}"
+    COMMAND "${GIT_EXECUTABLE}" clone ${CLONE_OPTS} https://${URL}.git
       ${PACKAGE_DIR}/src
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
