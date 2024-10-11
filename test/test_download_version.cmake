@@ -36,4 +36,20 @@ section("it should redownload the package with a specific tag name")
   endsection()
 endsection()
 
+section("it should redownload the package with a specific commit hash")
+  cdeps_download_package(pkg github.com/threeal/project-starter
+    ad2c03959cb67fffc7cce7266bc244c73a2af8ec)
+
+  section("it should regenerate the lock file")
+    file(READ .cdeps/pkg/src.lock CONTENT)
+    assert(CONTENT MATCHES ad2c03959cb67fffc7cce7266bc244c73a2af8ec$)
+  endsection()
+
+  section("it should redownload with the correct commit hash")
+    assert_execute_process(
+      COMMAND ${GIT_EXECUTABLE} -C .cdeps/pkg/src rev-parse HEAD
+      OUTPUT ad2c03959cb67fffc7cce7266bc244c73a2af8ec)
+  endsection()
+endsection()
+
 file(REMOVE_RECURSE .cdeps)
