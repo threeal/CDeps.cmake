@@ -55,7 +55,7 @@ function(cdeps_download_package NAME URL REF)
   if(EXISTS ${CDEPS_DIR}/${NAME}/src.lock)
     file(READ ${CDEPS_DIR}/${NAME}/src.lock LOCK)
     if(LOCK STREQUAL SOURCE_LOCK)
-      message(STATUS "CDeps: Using existing ${NAME} source files")
+      message(STATUS "CDeps: Using existing ${NAME} download")
       set(${NAME}_SOURCE_DIR ${CDEPS_DIR}/${NAME}/src PARENT_SCOPE)
       return()
     else()
@@ -63,6 +63,8 @@ function(cdeps_download_package NAME URL REF)
       file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
     endif()
   endif()
+
+  message(STATUS "CDeps: Downloading ${NAME}")
 
   if(NOT DEFINED GIT_EXECUTABLE)
     find_package(Git)
@@ -77,7 +79,6 @@ function(cdeps_download_package NAME URL REF)
     list(APPEND CLONE_OPTS --recurse-submodules)
   endif()
 
-  message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" clone ${CLONE_OPTS} https://${URL}.git
       ${CDEPS_DIR}/${NAME}/src
@@ -162,7 +163,8 @@ function(cdeps_build_package NAME)
     endif()
   endif()
 
-  message(STATUS "CDeps: Configuring ${NAME}")
+  message(STATUS "CDeps: Building ${NAME}")
+
   if(DEFINED ARG_GENERATOR)
     list(APPEND CONFIGURE_ARGS -G "${ARG_GENERATOR}")
   endif()
@@ -181,7 +183,6 @@ function(cdeps_build_package NAME)
     return()
   endif()
 
-  message(STATUS "CDeps: Building ${NAME}")
   execute_process(
     COMMAND "${CMAKE_COMMAND}" --build ${CDEPS_DIR}/${NAME}/build
     ERROR_VARIABLE ERR
@@ -230,6 +231,7 @@ function(cdeps_install_package NAME)
   endif()
 
   message(STATUS "CDeps: Installing ${NAME}")
+
   execute_process(
     COMMAND "${CMAKE_COMMAND}" --install ${CDEPS_DIR}/${NAME}/build
       --prefix ${CDEPS_DIR}/${NAME}/install
