@@ -60,11 +60,11 @@ function(cdeps_download_package NAME URL REF)
       return()
     else()
       file(REMOVE ${CDEPS_DIR}/${NAME}/src.lock)
-      file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
     endif()
   endif()
 
   message(STATUS "CDeps: Downloading ${NAME}")
+  file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
 
   if(NOT DEFINED GIT_EXECUTABLE)
     find_package(Git)
@@ -86,7 +86,6 @@ function(cdeps_download_package NAME URL REF)
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
     string(JOIN " " COMMAND ${CLONE_COMMAND})
     message(FATAL_ERROR
       "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
@@ -161,11 +160,11 @@ function(cdeps_build_package NAME)
       return()
     else()
       file(REMOVE ${CDEPS_DIR}/${NAME}/build.lock)
-      file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
     endif()
   endif()
 
   message(STATUS "CDeps: Building ${NAME}")
+  file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
 
   set(CONFIGURE_COMMAND "${CMAKE_COMMAND}")
   if(DEFINED ARG_GENERATOR)
@@ -186,7 +185,6 @@ function(cdeps_build_package NAME)
       RESULT_VARIABLE RES
       OUTPUT_QUIET)
     if(NOT "${RES}" EQUAL 0)
-      file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
       string(JOIN " " COMMAND ${${COMMAND}})
       message(FATAL_ERROR
         "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
@@ -226,11 +224,11 @@ function(cdeps_install_package NAME)
       return()
     else()
       file(REMOVE ${CDEPS_DIR}/${NAME}/install.lock)
-      file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/install)
     endif()
   endif()
 
   message(STATUS "CDeps: Installing ${NAME}")
+  file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/install)
 
   set(INSTALL_COMMAND "${CMAKE_COMMAND}" --install ${CDEPS_DIR}/${NAME}/build
       --prefix ${CDEPS_DIR}/${NAME}/install)
@@ -241,7 +239,6 @@ function(cdeps_install_package NAME)
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/install)
     string(JOIN " " COMMAND ${INSTALL_COMMAND})
     message(FATAL_ERROR
       "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")

@@ -102,8 +102,8 @@ section("it should fail to rebuild the package "
     assert(NOT EXISTS .cdeps/pkg/build.lock)
   endsection()
 
-  section("it should remove the build directory")
-    assert(NOT EXISTS .cdeps/pkg/build)
+  section("it should not remove the build directory")
+    assert(EXISTS .cdeps/pkg/build)
   endsection()
 
   file(WRITE .cdeps/pkg/src/main.cpp "${ORIGINAL_MAIN_CPP}")
