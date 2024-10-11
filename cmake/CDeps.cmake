@@ -74,23 +74,36 @@ function(cdeps_download_package NAME URL REF)
     endif()
   endif()
 
-  set(CLONE_COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" --depth 1)
-  if(ARG_RECURSE_SUBMODULES)
-    list(APPEND CLONE_COMMAND --recurse-submodules)
-  endif()
-  list(APPEND CLONE_COMMAND https://${URL}.git ${CDEPS_DIR}/${NAME}/src)
+  set(CLONE_COMMAND "${GIT_EXECUTABLE}" clone --no-checkout --depth 1
+    https://${URL}.git ${CDEPS_DIR}/${NAME}/src)
 
-  execute_process(
-    COMMAND ${CLONE_COMMAND}
-    ERROR_VARIABLE ERR
-    RESULT_VARIABLE RES
-    OUTPUT_QUIET)
-  if(NOT "${RES}" EQUAL 0)
-    string(JOIN " " COMMAND ${CLONE_COMMAND})
-    message(FATAL_ERROR
-      "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
-    return()
+  set(FETCH_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
+    fetch --depth 1 --tags origin "${REF}")
+
+  set(CHECKOUT_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
+    checkout "${REF}")
+
+  set(COMMANDS CLONE_COMMAND FETCH_COMMAND CHECKOUT_COMMAND)
+
+  if(ARG_RECURSE_SUBMODULES)
+    set(SUBMODULE_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
+      submodule update --init --recursive)
+    list(APPEND COMMANDS SUBMODULE_COMMAND)
   endif()
+
+  foreach(COMMAND IN LISTS COMMANDS)
+    execute_process(
+      COMMAND ${${COMMAND}}
+      ERROR_VARIABLE ERR
+      RESULT_VARIABLE RES
+      OUTPUT_QUIET)
+    if(NOT "${RES}" EQUAL 0)
+      string(JOIN " " COMMAND ${${COMMAND}})
+      message(FATAL_ERROR
+        "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
+      return()
+    endif()
+  endforeach()
 
   file(WRITE ${CDEPS_DIR}/${NAME}/src.lock "${SOURCE_LOCK}")
   set(${NAME}_SOURCE_DIR ${CDEPS_DIR}/${NAME}/src PARENT_SCOPE)
