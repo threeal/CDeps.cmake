@@ -114,11 +114,6 @@ endfunction()
 # must be in the format `NAME=VALUE`, where `NAME` is the variable name and
 # `VALUE` is the variable value.
 #
-# If the `CMAKE_BUILD_TYPE` variable is defined in the main project but not
-# specified in `<options>...`, it will append that variable to `<options>...`,
-# ensuring the package is built using the same build type as the main project by
-# default.
-#
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
 # to the built external package.
 function(cdeps_build_package NAME)
@@ -130,15 +125,6 @@ function(cdeps_build_package NAME)
 
   if(DEFINED ARG_GENERATOR)
     set(GENERATOR "${ARG_GENERATOR}")
-  endif()
-
-  foreach(OPTION IN LISTS ARG_OPTIONS)
-    string(REGEX REPLACE "=.*" "" OPTION "${OPTION}")
-    list(APPEND OPTIONS_NAMES "${OPTION}")
-  endforeach()
-
-  if(DEFINED CMAKE_BUILD_TYPE AND NOT "CMAKE_BUILD_TYPE" IN_LIST OPTIONS_NAMES)
-    list(APPEND ARG_OPTIONS CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
   endif()
 
   if(NOT EXISTS ${CDEPS_DIR}/${NAME}/src.lock)
