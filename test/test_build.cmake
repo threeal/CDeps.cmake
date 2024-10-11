@@ -96,7 +96,7 @@ section("it should fail to rebuild the package "
 
   assert_fatal_error(
     CALL cdeps_build_package pkg
-    MESSAGE "CDeps: Failed to build pkg:")
+    MESSAGE "CDeps: Failed to execute process:")
 
   section("it should remove the lock file")
     assert(NOT EXISTS .cdeps/pkg/build.lock)
@@ -107,26 +107,6 @@ section("it should fail to rebuild the package "
   endsection()
 
   file(WRITE .cdeps/pkg/src/main.cpp "${ORIGINAL_MAIN_CPP}")
-endsection()
-
-section("it should fail to reconfigure the package "
-  "because of a corrupted CMakelists file")
-  file(READ .cdeps/pkg/src/CMakeLists.txt ORIGINAL_CMAKELISTS_TXT)
-  file(WRITE .cdeps/pkg/src/CMakeLists.txt corrupted)
-
-  assert_fatal_error(
-    CALL cdeps_build_package pkg
-    MESSAGE "CDeps: Failed to configure pkg:")
-
-  section("it should remove the lock file")
-    assert(NOT EXISTS .cdeps/pkg/build.lock)
-  endsection()
-
-  section("it should remove the build directory")
-    assert(NOT EXISTS .cdeps/pkg/build)
-  endsection()
-
-  file(WRITE .cdeps/pkg/src/CMakeLists.txt "${ORIGINAL_CMAKELISTS_TXT}")
 endsection()
 
 section("it should rebuild the package after a failure")

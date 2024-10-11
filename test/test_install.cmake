@@ -101,7 +101,7 @@ section("it should fail to reinstall the package "
 
   assert_fatal_error(
     CALL cdeps_install_package pkg
-    MESSAGE "CDeps: Failed to install pkg:")
+    MESSAGE "CDeps: Failed to execute process:")
 
   section("it should remove the lock file")
     assert(NOT EXISTS .cdeps/pkg/install.lock)
