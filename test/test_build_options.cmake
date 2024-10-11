@@ -28,18 +28,40 @@ section("it should build a package without options")
   endsection()
 endsection()
 
-section("it should rebuild the package with the specified options")
-  cdeps_build_package(pkg OPTIONS FIRST_OPTION=pertama SECOND_OPTION=kedua)
+section("it should rebuild the package with the default options")
+  block()
+    set(CDEPS_BUILD_OPTIONS FIRST_OPTION=pertama SECOND_OPTION=kedua)
+    cdeps_build_package(pkg)
+  endblock()
 
   section("it should regenerate the lock file")
     file(READ .cdeps/pkg/build.lock CONTENT)
-    assert(CONTENT MATCHES "OPTIONS FIRST_OPTION=pertama;SECOND_OPTION=kedua$")
+    assert(CONTENT MATCHES "OPTIONS FIRST_OPTION=pertama SECOND_OPTION=kedua$")
   endsection()
 
   section("it should rebuild with the correct options")
     assert_execute_process(
       COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
       OUTPUT "FIRST_OPTION:STRING=pertama.+SECOND_OPTION:STRING=kedua")
+  endsection()
+endsection()
+
+section("it should rebuild the package with the specified options")
+  block()
+    set(CDEPS_BUILD_OPTIONS FIRST_OPTION=pertama SECOND_OPTION=kedua)
+    cdeps_build_package(pkg OPTIONS FIRST_OPTION=uno SECOND_OPTION=dos)
+  endblock()
+
+  section("it should regenerate the lock file")
+    file(READ .cdeps/pkg/build.lock CONTENT)
+    assert(
+      CONTENT MATCHES "OPTIONS .+=.+ .+=.+ FIRST_OPTION=uno SECOND_OPTION=dos$")
+  endsection()
+
+  section("it should rebuild with the correct options")
+    assert_execute_process(
+      COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
+      OUTPUT "FIRST_OPTION:STRING=uno.+SECOND_OPTION:STRING=dos")
   endsection()
 endsection()
 

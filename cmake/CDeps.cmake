@@ -109,10 +109,13 @@ endfunction()
 # option is specified, the build system generator provided in `<generator>` will
 # be used instead, overriding the variable.
 #
-# If the `OPTIONS` option is specified, additional variables in each
-# `<options>...` will be defined for building the package. The `<options>...`
-# must be in the format `NAME=VALUE`, where `NAME` is the variable name and
-# `VALUE` is the variable value.
+# If the `CDEPS_BUILD_OPTIONS` list variable is defined, additional variables in
+# each list entry will be defined for building the package. Each entry must be
+# in the format `NAME=VALUE`, where `NAME` is the variable name and `VALUE` is
+# the variable value. If the `OPTIONS` option is specified, additional variables
+# provided in `<options>...` will also be used. Any variable defined in
+# `<options>...` will override the corresponding variable defined in the
+# `CDEPS_BUILD_OPTIONS` variable.
 #
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
 # to the built external package.
@@ -121,10 +124,18 @@ function(cdeps_build_package NAME)
     set(GENERATOR "${CDEPS_BUILD_GENERATOR}")
   endif()
 
+  if(DEFINED CDEPS_BUILD_OPTIONS)
+    list(APPEND OPTIONS ${CDEPS_BUILD_OPTIONS})
+  endif()
+
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" GENERATOR OPTIONS)
 
   if(DEFINED ARG_GENERATOR)
     set(GENERATOR "${ARG_GENERATOR}")
+  endif()
+
+  if(DEFINED ARG_OPTIONS)
+    list(APPEND OPTIONS ${ARG_OPTIONS})
   endif()
 
   if(NOT EXISTS ${CDEPS_DIR}/${NAME}/src.lock)
@@ -137,8 +148,9 @@ function(cdeps_build_package NAME)
   if(DEFINED GENERATOR)
     string(APPEND BUILD_LOCK " GENERATOR ${GENERATOR}")
   endif()
-  if(DEFINED ARG_OPTIONS)
-    string(APPEND BUILD_LOCK " OPTIONS ${ARG_OPTIONS}")
+  if(DEFINED OPTIONS)
+    string(JOIN " " OPTIONS_STR ${OPTIONS})
+    string(APPEND BUILD_LOCK " OPTIONS ${OPTIONS_STR}")
   endif()
 
   # Check if the lock file is valid; rebuild the package if it isn't.
@@ -160,7 +172,7 @@ function(cdeps_build_package NAME)
   if(DEFINED GENERATOR)
     list(APPEND CONFIGURE_COMMAND -G "${GENERATOR}")
   endif()
-  foreach(OPTION ${ARG_OPTIONS})
+  foreach(OPTION ${OPTIONS})
     list(APPEND CONFIGURE_COMMAND -D "${OPTION}")
   endforeach()
   list(APPEND CONFIGURE_COMMAND -S ${CDEPS_DIR}/${NAME}/src
