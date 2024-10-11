@@ -65,7 +65,7 @@ endsection()
 section("it should fail to redownload the package because of an invalid URL")
   assert_fatal_error(
     CALL cdeps_download_package pkg invalid.com invalid
-    MESSAGE "CDeps: Failed to download pkg:")
+    MESSAGE "CDeps: Failed to execute process:")
 
   section("it should remove the lock file")
     assert(NOT EXISTS .cdeps/pkg/src.lock)

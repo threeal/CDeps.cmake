@@ -27,7 +27,7 @@ section("it should fail to rebuild the package "
     set(CMAKE_GENERATOR invalid)
     assert_fatal_error(
       CALL cdeps_build_package pkg
-      MESSAGE "CDeps: Failed to configure pkg:")
+      MESSAGE "CDeps: Failed to execute process:")
   endblock()
 
   section("it should remove the lock file")
@@ -59,7 +59,7 @@ section("it should fail to rebuild the package "
     set(CMAKE_GENERATOR "Unix Makefiles")
     assert_fatal_error(
       CALL cdeps_build_package pkg GENERATOR invalid
-      MESSAGE "CDeps: Failed to configure pkg:")
+      MESSAGE "CDeps: Failed to execute process:")
   endblock()
 
   section("it should remove the lock file")

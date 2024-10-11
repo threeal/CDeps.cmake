@@ -55,7 +55,7 @@ function(cdeps_download_package NAME URL REF)
   if(EXISTS ${CDEPS_DIR}/${NAME}/src.lock)
     file(READ ${CDEPS_DIR}/${NAME}/src.lock LOCK)
     if(LOCK STREQUAL SOURCE_LOCK)
-      message(STATUS "CDeps: Using existing ${NAME} source files")
+      message(STATUS "CDeps: Using existing ${NAME} download")
       set(${NAME}_SOURCE_DIR ${CDEPS_DIR}/${NAME}/src PARENT_SCOPE)
       return()
     else()
@@ -63,6 +63,8 @@ function(cdeps_download_package NAME URL REF)
       file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
     endif()
   endif()
+
+  message(STATUS "CDeps: Downloading ${NAME}")
 
   if(NOT DEFINED GIT_EXECUTABLE)
     find_package(Git)
@@ -72,21 +74,22 @@ function(cdeps_download_package NAME URL REF)
     endif()
   endif()
 
-  set(CLONE_OPTS -b "${REF}" --depth 1)
+  set(CLONE_COMMAND "${GIT_EXECUTABLE}" clone -b "${REF}" --depth 1)
   if(ARG_RECURSE_SUBMODULES)
-    list(APPEND CLONE_OPTS --recurse-submodules)
+    list(APPEND CLONE_COMMAND --recurse-submodules)
   endif()
+  list(APPEND CLONE_COMMAND https://${URL}.git ${CDEPS_DIR}/${NAME}/src)
 
-  message(STATUS "CDeps: Downloading ${NAME} from ${GIT_URL} at ${REF}")
   execute_process(
-    COMMAND "${GIT_EXECUTABLE}" clone ${CLONE_OPTS} https://${URL}.git
-      ${CDEPS_DIR}/${NAME}/src
+    COMMAND ${CLONE_COMMAND}
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
-    message(FATAL_ERROR "CDeps: Failed to download ${NAME}: ${ERR}")
+    string(JOIN " " COMMAND ${CLONE_COMMAND})
+    message(FATAL_ERROR
+      "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
     return()
   endif()
 
@@ -162,36 +165,34 @@ function(cdeps_build_package NAME)
     endif()
   endif()
 
-  message(STATUS "CDeps: Configuring ${NAME}")
+  message(STATUS "CDeps: Building ${NAME}")
+
+  set(CONFIGURE_COMMAND "${CMAKE_COMMAND}")
   if(DEFINED ARG_GENERATOR)
-    list(APPEND CONFIGURE_ARGS -G "${ARG_GENERATOR}")
+    list(APPEND CONFIGURE_COMMAND -G "${ARG_GENERATOR}")
   endif()
   foreach(OPTION ${ARG_OPTIONS})
-    list(APPEND CONFIGURE_ARGS -D "${OPTION}")
+    list(APPEND CONFIGURE_COMMAND -D "${OPTION}")
   endforeach()
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" -B ${CDEPS_DIR}/${NAME}/build ${CONFIGURE_ARGS}
-      ${CDEPS_DIR}/${NAME}/src
-    ERROR_VARIABLE ERR
-    RESULT_VARIABLE RES
-    OUTPUT_QUIET)
-  if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
-    message(FATAL_ERROR "CDeps: Failed to configure ${NAME}: ${ERR}")
-    return()
-  endif()
+  list(APPEND CONFIGURE_COMMAND -S ${CDEPS_DIR}/${NAME}/src
+    -B ${CDEPS_DIR}/${NAME}/build)
 
-  message(STATUS "CDeps: Building ${NAME}")
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" --build ${CDEPS_DIR}/${NAME}/build
-    ERROR_VARIABLE ERR
-    RESULT_VARIABLE RES
-    OUTPUT_QUIET)
-  if(NOT "${RES}" EQUAL 0)
-    file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
-    message(FATAL_ERROR "CDeps: Failed to build ${NAME}: ${ERR}")
-    return()
-  endif()
+  set(BUILD_COMMAND "${CMAKE_COMMAND}" --build ${CDEPS_DIR}/${NAME}/build)
+
+  foreach(COMMAND IN ITEMS CONFIGURE_COMMAND BUILD_COMMAND)
+    execute_process(
+      COMMAND ${${COMMAND}}
+      ERROR_VARIABLE ERR
+      RESULT_VARIABLE RES
+      OUTPUT_QUIET)
+    if(NOT "${RES}" EQUAL 0)
+      file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
+      string(JOIN " " COMMAND ${${COMMAND}})
+      message(FATAL_ERROR
+        "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
+      return()
+    endif()
+  endforeach()
 
   file(WRITE ${CDEPS_DIR}/${NAME}/build.lock "${BUILD_LOCK}")
   set(${NAME}_BUILD_DIR ${CDEPS_DIR}/${NAME}/build PARENT_SCOPE)
@@ -230,15 +231,20 @@ function(cdeps_install_package NAME)
   endif()
 
   message(STATUS "CDeps: Installing ${NAME}")
+
+  set(INSTALL_COMMAND "${CMAKE_COMMAND}" --install ${CDEPS_DIR}/${NAME}/build
+      --prefix ${CDEPS_DIR}/${NAME}/install)
+
   execute_process(
-    COMMAND "${CMAKE_COMMAND}" --install ${CDEPS_DIR}/${NAME}/build
-      --prefix ${CDEPS_DIR}/${NAME}/install
+    COMMAND ${INSTALL_COMMAND}
     ERROR_VARIABLE ERR
     RESULT_VARIABLE RES
     OUTPUT_QUIET)
   if(NOT "${RES}" EQUAL 0)
     file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/install)
-    message(FATAL_ERROR "CDeps: Failed to install ${NAME}: ${ERR}")
+    string(JOIN " " COMMAND ${INSTALL_COMMAND})
+    message(FATAL_ERROR
+      "CDeps: Failed to execute process:\n  ${COMMAND}\n${ERR}")
     return()
   endif()
 
