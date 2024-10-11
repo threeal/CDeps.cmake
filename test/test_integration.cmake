@@ -25,7 +25,7 @@ section("it should regenerate the source code of the test project")
     "include(${CDEPS_LIST_FILE})\n"
     "\n"
     "cdeps_download_package(CppStarter github.com/threeal/cpp-starter v1.0.0)\n"
-    "cdeps_build_package(CppStarter)\n"
+    "cdeps_build_package(CppStarter GENERATOR \"\${CMAKE_GENERATOR}\")\n"
     "cdeps_install_package(CppStarter)\n"
     "\n"
     "find_package(MyFibonacci REQUIRED CONFIG\n"
