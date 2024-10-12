@@ -65,6 +65,7 @@ function(cdeps_download_package NAME URL REF)
 
   message(STATUS "CDeps: Downloading ${NAME}")
   file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/src)
+  file(MAKE_DIRECTORY ${CDEPS_DIR}/${NAME}/src)
 
   if(NOT DEFINED GIT_EXECUTABLE)
     find_package(Git)
@@ -74,8 +75,10 @@ function(cdeps_download_package NAME URL REF)
     endif()
   endif()
 
-  set(CLONE_COMMAND "${GIT_EXECUTABLE}" clone --no-checkout --depth 1
-    https://${URL}.git ${CDEPS_DIR}/${NAME}/src)
+  set(INIT_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src init)
+
+  set(ADD_REMOTE_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
+    remote add origin https://${URL}.git)
 
   set(FETCH_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
     fetch --depth 1 --tags origin "${REF}")
@@ -83,7 +86,8 @@ function(cdeps_download_package NAME URL REF)
   set(CHECKOUT_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
     checkout "${REF}")
 
-  set(COMMANDS CLONE_COMMAND FETCH_COMMAND CHECKOUT_COMMAND)
+  set(COMMANDS INIT_COMMAND ADD_REMOTE_COMMAND FETCH_COMMAND
+    CHECKOUT_COMMAND)
 
   if(ARG_RECURSE_SUBMODULES)
     set(SUBMODULE_COMMAND "${GIT_EXECUTABLE}" -C ${CDEPS_DIR}/${NAME}/src
