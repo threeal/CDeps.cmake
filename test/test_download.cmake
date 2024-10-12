@@ -71,8 +71,8 @@ section("it should fail to redownload the package because of an invalid URL")
     assert(NOT EXISTS .cdeps/pkg/src.lock)
   endsection()
 
-  section("it should remove the source directory")
-    assert(NOT EXISTS .cdeps/pkg/src)
+  section("it should not remove the source directory")
+    assert(EXISTS .cdeps/pkg/src)
   endsection()
 endsection()
 
