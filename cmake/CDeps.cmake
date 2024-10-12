@@ -117,37 +117,38 @@ endfunction()
 # options. If the package is already built, it does nothing. The `<name>`
 # package must be downloaded before calling this function.
 #
-# If the `GENERATOR` option is specified, the package will be built using the
-# `<generator>` build system generator. Otherwise, it will be built using the
-# same build system generator as the main project, specified by the
-# `CMAKE_GENERATOR` variable.
+# If the `CDEPS_BUILD_GENERATOR` variable is defined, the package will be built
+# using the build system generator specified in the variable. If the `GENERATOR`
+# option is specified, the build system generator provided in `<generator>` will
+# be used instead, overriding the variable.
 #
-# If the `OPTIONS` option is specified, additional variables specified in each
-# `<options>...` will be defined for building the package. The `<options>...`
-# must be in the format `NAME=VALUE`, where `NAME` is the variable name and
-# `VALUE` is the variable value.
-#
-# If the `CMAKE_BUILD_TYPE` variable is defined in the main project but not
-# specified in `<options>...`, it will append that variable to `<options>...`,
-# making the package be built using the same build type as the main project by
-# default.
+# If the `CDEPS_BUILD_OPTIONS` list variable is defined, additional variables in
+# each list entry will be defined for building the package. Each entry must be
+# in the format `NAME=VALUE`, where `NAME` is the variable name and `VALUE` is
+# the variable value. If the `OPTIONS` option is specified, additional variables
+# provided in `<options>...` will also be used. Any variable defined in
+# `<options>...` will override the corresponding variable defined in the
+# `CDEPS_BUILD_OPTIONS` variable.
 #
 # This function outputs the `<name>_BUILD_DIR` variable, which contains the path
 # to the built external package.
 function(cdeps_build_package NAME)
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" GENERATOR OPTIONS)
-
-  if(NOT DEFINED ARG_GENERATOR AND DEFINED CMAKE_GENERATOR)
-    set(ARG_GENERATOR "${CMAKE_GENERATOR}")
+  if(DEFINED CDEPS_BUILD_GENERATOR)
+    set(GENERATOR "${CDEPS_BUILD_GENERATOR}")
   endif()
 
-  foreach(OPTION IN LISTS ARG_OPTIONS)
-    string(REGEX REPLACE "=.*" "" OPTION "${OPTION}")
-    list(APPEND OPTIONS_NAMES "${OPTION}")
-  endforeach()
+  if(DEFINED CDEPS_BUILD_OPTIONS)
+    list(APPEND OPTIONS ${CDEPS_BUILD_OPTIONS})
+  endif()
 
-  if(DEFINED CMAKE_BUILD_TYPE AND NOT "CMAKE_BUILD_TYPE" IN_LIST OPTIONS_NAMES)
-    list(APPEND ARG_OPTIONS CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" GENERATOR OPTIONS)
+
+  if(DEFINED ARG_GENERATOR)
+    set(GENERATOR "${ARG_GENERATOR}")
+  endif()
+
+  if(DEFINED ARG_OPTIONS)
+    list(APPEND OPTIONS ${ARG_OPTIONS})
   endif()
 
   if(NOT EXISTS ${CDEPS_DIR}/${NAME}/src.lock)
@@ -157,11 +158,12 @@ function(cdeps_build_package NAME)
 
   file(READ ${CDEPS_DIR}/${NAME}/src.lock SOURCE_LOCK)
   set(BUILD_LOCK "${SOURCE_LOCK}")
-  if(DEFINED ARG_GENERATOR)
-    string(APPEND BUILD_LOCK " GENERATOR ${ARG_GENERATOR}")
+  if(DEFINED GENERATOR)
+    string(APPEND BUILD_LOCK " GENERATOR ${GENERATOR}")
   endif()
-  if(DEFINED ARG_OPTIONS)
-    string(APPEND BUILD_LOCK " OPTIONS ${ARG_OPTIONS}")
+  if(DEFINED OPTIONS)
+    string(JOIN " " OPTIONS_STR ${OPTIONS})
+    string(APPEND BUILD_LOCK " OPTIONS ${OPTIONS_STR}")
   endif()
 
   # Check if the lock file is valid; rebuild the package if it isn't.
@@ -180,10 +182,10 @@ function(cdeps_build_package NAME)
   file(REMOVE_RECURSE ${CDEPS_DIR}/${NAME}/build)
 
   set(CONFIGURE_COMMAND "${CMAKE_COMMAND}")
-  if(DEFINED ARG_GENERATOR)
-    list(APPEND CONFIGURE_COMMAND -G "${ARG_GENERATOR}")
+  if(DEFINED GENERATOR)
+    list(APPEND CONFIGURE_COMMAND -G "${GENERATOR}")
   endif()
-  foreach(OPTION ${ARG_OPTIONS})
+  foreach(OPTION ${OPTIONS})
     list(APPEND CONFIGURE_COMMAND -D "${OPTION}")
   endforeach()
   list(APPEND CONFIGURE_COMMAND -S ${CDEPS_DIR}/${NAME}/src

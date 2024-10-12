@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
 
-set(CMAKE_GENERATOR "Unix Makefiles")
+set(CDEPS_BUILD_GENERATOR "Unix Makefiles")
 
 set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)

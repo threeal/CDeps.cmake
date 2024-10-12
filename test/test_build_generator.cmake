@@ -12,7 +12,7 @@ file(WRITE .cdeps/pkg/src/CMakeLists.txt
 
 file(WRITE .cdeps/pkg/src.lock "pkg github.com/user/pkg main")
 
-section("it should build a package with the default generator")
+section("it should build a package without a generator specified")
   cdeps_build_package(pkg)
 
   section("it should generate the lock file")
@@ -22,9 +22,9 @@ section("it should build a package with the default generator")
 endsection()
 
 section("it should fail to rebuild the package "
-  "because of an invalid main project generator")
+  "due to an invalid default generator")
   block()
-    set(CMAKE_GENERATOR invalid)
+    set(CDEPS_BUILD_GENERATOR invalid)
     assert_fatal_error(
       CALL cdeps_build_package pkg
       MESSAGE "CDeps: Failed to execute process:")
@@ -35,9 +35,9 @@ section("it should fail to rebuild the package "
   endsection()
 endsection()
 
-section("it should rebuild the package with the main project generator")
+section("it should rebuild the package with the default generator")
   block()
-    set(CMAKE_GENERATOR "Unix Makefiles")
+    set(CDEPS_BUILD_GENERATOR "Unix Makefiles")
     cdeps_build_package(pkg)
   endblock()
 
@@ -54,9 +54,9 @@ section("it should rebuild the package with the main project generator")
 endsection()
 
 section("it should fail to rebuild the package "
-  "because of an invalid specified generator")
+  "due to an invalid specified generator")
   block()
-    set(CMAKE_GENERATOR "Unix Makefiles")
+    set(CDEPS_BUILD_GENERATOR "Unix Makefiles")
     assert_fatal_error(
       CALL cdeps_build_package pkg GENERATOR invalid
       MESSAGE "CDeps: Failed to execute process:")
@@ -69,7 +69,7 @@ endsection()
 
 section("it should rebuild the package with the specified generator")
   block()
-    set(CMAKE_GENERATOR invalid)
+    set(CDEPS_BUILD_GENERATOR invalid)
     cdeps_build_package(pkg GENERATOR "Unix Makefiles")
   endblock()
 
