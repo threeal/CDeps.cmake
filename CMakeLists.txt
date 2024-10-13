@@ -34,13 +34,16 @@ if(CDEPS_ENABLE_TESTS)
 endif()
 
 if(CDEPS_ENABLE_INSTALL)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfig.cmake
+    "include(\${CMAKE_CURRENT_LIST_DIR}/CDeps.cmake)\n")
+
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(cmake/CDepsConfigVersion.cmake
     COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
 
   install(
     FILES cmake/CDeps.cmake
-      cmake/CDepsConfig.cmake
+      ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfig.cmake
       ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfigVersion.cmake
     DESTINATION lib/cmake/CDeps)
 endif()
