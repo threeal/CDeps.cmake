@@ -6,9 +6,9 @@ The [`CDeps.cmake`](./cmake/CDeps.cmake) module allows CMake projects to make th
 
 This module provides the following commands to manage dependencies in CMake projects:
 
-- `cdeps_download_package`: Downloads the source files of a dependency using [Git](https://git-scm.com/).
-- `cdeps_build_package`: Builds a dependency using CMake.
-- `cdeps_install_package`: Installs the targets of a dependency using CMake.
+- [`cdeps_download_package`](#cdeps_download_package): Downloads the source files of a dependency using [Git](https://git-scm.com/).
+- [`cdeps_build_package`](#cdeps_build_package): Builds a dependency using CMake.
+- [`cdeps_install_package`](#cdeps_install_package): Installs the targets of a dependency using CMake.
 
 These commands enable a dependency to be downloaded, built, and installed as necessary. When combined with a [find package module](https://cmake.org/cmake/help/book/mastering-cmake/chapter/Finding%20Packages.html), they can serve as a fallback if the dependency is not already available in the system.
 
@@ -28,7 +28,7 @@ The recommended way to integrate this module into a CMake project is by download
 file(
   DOWNLOAD https://github.com/threeal/CDeps.cmake/releases/download/v0.1.0/CDeps.cmake
     ${CMAKE_BINARY_DIR}/cmake/CDeps.cmake
-  EXPECTED_MD5 2aa70c4d0b6a89d3770a330936294065)
+  EXPECTED_MD5 bed206ba7a9d6cded38977ca95395dd4)
 
 include(${CMAKE_BINARY_DIR}/cmake/CDeps.cmake)
 ```
@@ -88,6 +88,58 @@ find_package(FMT 11.0.2 REQUIRED)
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE fmt::fmt)
 ```
+
+## API Reference
+
+### `CDEPS_VERSION`
+
+This variable specifies the version of the included `CDeps.cmake` module.
+
+### `CDEPS_DIR`
+
+This variable specifies the directory used by CDeps to store packages. Modify this variable to specify a different directory for storing packages.
+
+### `cdeps_download_package`
+
+Downloads the source files of an external package.
+
+```cmake
+cdeps_download_package(<name> <url> <ref> [RECURSE_SUBMODULES])
+```
+
+This function downloads the source files of an external package named `<name>` using Git. It retrieves the source files from the specified `<url>` with a particular `<ref>`. The `<url>` must be specified without a protocol (e.g., `github.com/user/repo`), while the `<ref>` can be a branch, tag, or commit hash.
+
+If the `RECURSE_SUBMODULES` option is specified, the external package will be downloaded along with its submodules recursively.
+
+This function outputs the `<name>_SOURCE_DIR` variable, which contains the path to the downloaded source files of the external package.
+
+### `cdeps_build_package`
+
+Builds an external package.
+
+```cmake
+cdeps_build_package(<name> [GENERATOR <generator>] [OPTIONS <options>...])
+```
+
+This function builds an external package named `<name>` with the specified options. If the package is already built, it does nothing. The `<name>` package must be downloaded before calling this function.
+
+If the `CDEPS_BUILD_GENERATOR` variable is defined, the package will be built using the build system generator specified in the variable. If the `GENERATOR` option is specified, the build system generator provided in `<generator>` will be used instead, overriding the variable.
+
+If the `CDEPS_BUILD_OPTIONS` list variable is defined, additional variables in each list entry will be used for building the package. Each entry must be in the format `NAME=VALUE`, where `NAME` is the variable name and `VALUE` is the variable value. If the `OPTIONS` option is specified, additional variables provided in `<options>...` will also be used. Any variable defined in `<options>...` will override the corresponding variable defined in the `CDEPS_BUILD_OPTIONS` variable.
+
+This function outputs the `<name>_BUILD_DIR` variable, which contains the path to the built external package.
+
+### `cdeps_install_package`
+
+Installs an external package.
+
+```cmake
+cdeps_install_package(<name>)
+```
+
+This function installs an external package named `<name>`. If the package is already installed, it does nothing. The `<name>` package must already be built before calling this function.
+
+This function outputs the `<name>_INSTALL_DIR` variable, which contains the path to the installed external package.
 
 ## License
 
