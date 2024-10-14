@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 project(
   CDeps
   VERSION 0.1.0
-  DESCRIPTION "Build and install missing dependencies in your CMake project"
+  DESCRIPTION "Download, build, and install missing dependencies in CMake projects"
   HOMEPAGE_URL https://github.com/threeal/CDeps.cmake
   LANGUAGES NONE)
 
