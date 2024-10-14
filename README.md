@@ -28,7 +28,7 @@ The recommended way to integrate this module into a CMake project is by download
 file(
   DOWNLOAD https://github.com/threeal/CDeps.cmake/releases/download/v0.1.0/CDeps.cmake
     ${CMAKE_BINARY_DIR}/cmake/CDeps.cmake
-  EXPECTED_MD5 2aa70c4d0b6a89d3770a330936294065)
+  EXPECTED_MD5 bed206ba7a9d6cded38977ca95395dd4)
 
 include(${CMAKE_BINARY_DIR}/cmake/CDeps.cmake)
 ```

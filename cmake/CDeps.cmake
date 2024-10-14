@@ -24,6 +24,7 @@
 set(CDEPS_VERSION 0.1.0)
 
 # This variable specifies the directory used by CDeps to store packages.
+# Modify this variable to specify a different directory for storing packages.
 if(NOT DEFINED CDEPS_DIR)
   set(CDEPS_DIR ${CMAKE_SOURCE_DIR}/.cdeps)
 endif()
@@ -33,7 +34,7 @@ endif()
 # cdeps_download_package(<name> <url> <ref> [RECURSE_SUBMODULES])
 #
 # This function downloads the source files of an external package named `<name>`
-# using Git. It downloads the source files from the specified `<url>` with a
+# using Git. It retrieves the source files from the specified `<url>` with a
 # particular `<ref>`. The `<url>` must be specified without a protocol (e.g.,
 # `github.com/user/repo`), while the `<ref>` can be a branch, tag, or commit
 # hash.
@@ -127,9 +128,9 @@ endfunction()
 # be used instead, overriding the variable.
 #
 # If the `CDEPS_BUILD_OPTIONS` list variable is defined, additional variables in
-# each list entry will be defined for building the package. Each entry must be
-# in the format `NAME=VALUE`, where `NAME` is the variable name and `VALUE` is
-# the variable value. If the `OPTIONS` option is specified, additional variables
+# each list entry will be used for building the package. Each entry must be in
+# the format `NAME=VALUE`, where `NAME` is the variable name and `VALUE` is the
+# variable value. If the `OPTIONS` option is specified, additional variables
 # provided in `<options>...` will also be used. Any variable defined in
 # `<options>...` will override the corresponding variable defined in the
 # `CDEPS_BUILD_OPTIONS` variable.
