@@ -28,7 +28,7 @@ The recommended way to integrate this module into a CMake project is by download
 file(
   DOWNLOAD https://github.com/threeal/CDeps.cmake/releases/download/v0.1.0/CDeps.cmake
     ${CMAKE_BINARY_DIR}/cmake/CDeps.cmake
-  EXPECTED_MD5 bed206ba7a9d6cded38977ca95395dd4)
+  EXPECTED_MD5 a9d1c7002227a12f9614dddf9336e3dd)
 
 include(${CMAKE_BINARY_DIR}/cmake/CDeps.cmake)
 ```
@@ -118,10 +118,16 @@ This function outputs the `<name>_SOURCE_DIR` variable, which contains the path 
 Builds an external package.
 
 ```cmake
-cdeps_build_package(<name> [GENERATOR <generator>] [OPTIONS <options>...])
+cdeps_build_package(
+  <name>
+  [SOURCE_SUBDIR <subdir>]
+  [GENERATOR <generator>]
+  [OPTIONS <options>...])
 ```
 
 This function builds an external package named `<name>` with the specified options. If the package is already built, it does nothing. The `<name>` package must be downloaded before calling this function.
+
+If the `SOURCE_SUBDIR` option is specified, the package will be built from the CMake project located in the `<subdir>` directory, relative to the downloaded package source directory.
 
 If the `CDEPS_BUILD_GENERATOR` variable is defined, the package will be built using the build system generator specified in the variable. If the `GENERATOR` option is specified, the build system generator provided in `<generator>` will be used instead, overriding the variable.
 

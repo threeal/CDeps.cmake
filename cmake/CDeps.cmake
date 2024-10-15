@@ -116,11 +116,19 @@ endfunction()
 
 # Builds an external package.
 #
-# cdeps_build_package(<name> [GENERATOR <generator>] [OPTIONS <options>...])
+# cdeps_build_package(
+#   <name>
+#   [SOURCE_SUBDIR <subdir>]
+#   [GENERATOR <generator>]
+#   [OPTIONS <options>...])
 #
 # This function builds an external package named `<name>` with the specified
 # options. If the package is already built, it does nothing. The `<name>`
 # package must be downloaded before calling this function.
+#
+# If the `SOURCE_SUBDIR` option is specified, the package will be built from the
+# CMake project located in the `<subdir>` directory, relative to the downloaded
+# package source directory.
 #
 # If the `CDEPS_BUILD_GENERATOR` variable is defined, the package will be built
 # using the build system generator specified in the variable. If the `GENERATOR`
@@ -146,7 +154,8 @@ function(cdeps_build_package NAME)
     list(APPEND OPTIONS ${CDEPS_BUILD_OPTIONS})
   endif()
 
-  cmake_parse_arguments(PARSE_ARGV 1 ARG "" GENERATOR OPTIONS)
+  cmake_parse_arguments(
+    PARSE_ARGV 1 ARG "" "GENERATOR;SOURCE_SUBDIR" OPTIONS)
 
   if(DEFINED ARG_GENERATOR)
     set(GENERATOR "${ARG_GENERATOR}")
@@ -163,6 +172,9 @@ function(cdeps_build_package NAME)
 
   file(READ ${CDEPS_DIR}/${NAME}/src.lock SOURCE_LOCK)
   set(BUILD_LOCK "${SOURCE_LOCK}")
+  if(DEFINED ARG_SOURCE_SUBDIR)
+    string(APPEND BUILD_LOCK " SOURCE_SUBDIR ${ARG_SOURCE_SUBDIR}")
+  endif()
   if(DEFINED GENERATOR)
     string(APPEND BUILD_LOCK " GENERATOR ${GENERATOR}")
   endif()
@@ -193,8 +205,13 @@ function(cdeps_build_package NAME)
   foreach(OPTION ${OPTIONS})
     list(APPEND CONFIGURE_COMMAND -D "${OPTION}")
   endforeach()
-  list(APPEND CONFIGURE_COMMAND -S ${CDEPS_DIR}/${NAME}/src
-    -B ${CDEPS_DIR}/${NAME}/build)
+  if(DEFINED ARG_SOURCE_SUBDIR)
+    list(APPEND CONFIGURE_COMMAND
+      -S ${CDEPS_DIR}/${NAME}/src/${ARG_SOURCE_SUBDIR})
+  else()
+    list(APPEND CONFIGURE_COMMAND -S ${CDEPS_DIR}/${NAME}/src)
+  endif()
+  list(APPEND CONFIGURE_COMMAND -B ${CDEPS_DIR}/${NAME}/build)
 
   set(BUILD_COMMAND "${CMAKE_COMMAND}" --build ${CDEPS_DIR}/${NAME}/build)
 
