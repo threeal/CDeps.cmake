@@ -47,4 +47,7 @@ if(CDEPS_ENABLE_INSTALL)
       ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfig.cmake
       ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfigVersion.cmake
     DESTINATION lib/cmake/CDeps)
+
+  set(CPACK_SYSTEM_NAME any)
+  include(CPack)
 endif()
