@@ -22,7 +22,7 @@ include(CDeps)
 if(CDEPS_ENABLE_TESTS)
   enable_testing()
 
-  find_package(Assertion 1.0.0 REQUIRED)
+  find_package(Assertion 2.0.0 REQUIRED)
   list(APPEND CMAKE_SCRIPT_TEST_DEFINITIONS CMAKE_MODULE_PATH)
 
   add_cmake_script_test(test/test_build_generator.cmake)
