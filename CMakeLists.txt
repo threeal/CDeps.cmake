@@ -10,14 +10,14 @@ project(
 option(CDEPS_ENABLE_TESTS "Enable test targets.")
 option(CDEPS_ENABLE_INSTALL "Enable install targets." ${PROJECT_IS_TOP_LEVEL})
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Prefer system packages over the find modules provided by this project.
 if(NOT DEFINED CMAKE_FIND_PACKAGE_PREFER_CONFIG)
   set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 endif()
 
-include(cmake/CDeps.cmake)
+include(CDeps)
 
 if(CDEPS_ENABLE_TESTS)
   enable_testing()
@@ -38,7 +38,8 @@ endif()
 
 if(CDEPS_ENABLE_INSTALL)
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cmake/CDepsConfig.cmake
-    "include(\${CMAKE_CURRENT_LIST_DIR}/CDeps.cmake)\n")
+    "list(PREPEND CMAKE_MODULE_PATH \${CMAKE_CURRENT_LIST_DIR})\n"
+    "include(CDeps)\n")
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(cmake/CDepsConfigVersion.cmake
