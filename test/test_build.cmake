@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_BUILD_GENERATOR "Unix Makefiles")
 
@@ -9,9 +10,8 @@ file(REMOVE_RECURSE .cdeps)
 
 section("it should fail to build a package "
   "because it has not been downloaded")
-  assert_fatal_error(
-    CALL cdeps_build_package pkg
-    MESSAGE "CDeps: pkg must be downloaded before building")
+  assert_call(cdeps_build_package pkg
+    EXPECT_ERROR "^CDeps: pkg must be downloaded before building")
 endsection()
 
 file(WRITE .cdeps/pkg/src/CMakeLists.txt
@@ -47,9 +47,11 @@ section("it should build a package")
 
   section("it should build the correct targets")
     if(EXISTS .cdeps/pkg/build/main)
-      assert_execute_process(.cdeps/pkg/build/main OUTPUT "Hello World!")
+      assert_execute_process(.cdeps/pkg/build/main
+        EXPECT_OUTPUT STREQUAL "Hello World!")
     elseif(EXISTS .cdeps/pkg/build/main.exe)
-      assert_execute_process(.cdeps/pkg/build/main.exe OUTPUT "Hello World!")
+      assert_execute_process(.cdeps/pkg/build/main.exe
+        EXPECT_OUTPUT STREQUAL "Hello World!")
     else()
       fail("expected path" .cdeps/pkg/build/main "to exist")
     endif()
@@ -94,9 +96,8 @@ section("it should fail to rebuild the package "
   file(WRITE .cdeps/pkg/src/main.cpp corrupted)
   file(APPEND .cdeps/pkg/build.lock " invalidated")
 
-  assert_fatal_error(
-    CALL cdeps_build_package pkg
-    MESSAGE "CDeps: Failed to execute process:")
+  assert_call(cdeps_build_package pkg
+    EXPECT_ERROR "^CDeps: Failed to execute process:")
 
   section("it should remove the lock file")
     assert(NOT EXISTS .cdeps/pkg/build.lock)

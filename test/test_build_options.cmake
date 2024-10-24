@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
@@ -23,8 +24,8 @@ section("it should build a package without options")
 
   section("it should build with the correct options")
     assert_execute_process(
-      COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "FIRST_OPTION:STRING=first.+SECOND_OPTION:STRING=second")
+      COMMAND "${CMAKE_COMMAND}" -L -N .cdeps/pkg/build
+      EXPECT_OUTPUT "FIRST_OPTION:STRING=first.+SECOND_OPTION:STRING=second")
   endsection()
 endsection()
 
@@ -41,8 +42,8 @@ section("it should rebuild the package with the default options")
 
   section("it should rebuild with the correct options")
     assert_execute_process(
-      COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "FIRST_OPTION:STRING=pertama.+SECOND_OPTION:STRING=kedua")
+      COMMAND "${CMAKE_COMMAND}" -L -N .cdeps/pkg/build
+      EXPECT_OUTPUT "FIRST_OPTION:STRING=pertama.+SECOND_OPTION:STRING=kedua")
   endsection()
 endsection()
 
@@ -60,8 +61,8 @@ section("it should rebuild the package with the specified options")
 
   section("it should rebuild with the correct options")
     assert_execute_process(
-      COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "FIRST_OPTION:STRING=uno.+SECOND_OPTION:STRING=dos")
+      COMMAND "${CMAKE_COMMAND}" -L -N .cdeps/pkg/build
+      EXPECT_OUTPUT "FIRST_OPTION:STRING=uno.+SECOND_OPTION:STRING=dos")
   endsection()
 endsection()
 

@@ -1,6 +1,9 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+cmake_minimum_required(VERSION 3.21)
 
 find_package(Git REQUIRED QUIET)
+
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
@@ -16,7 +19,7 @@ section("it should download a package without submodules")
   section("it should not download the submodules")
     assert_execute_process(
       COMMAND ${GIT_EXECUTABLE} -C .cdeps/pkg/src submodule status --recursive
-      OUTPUT "^-.+ project-starter")
+      EXPECT_OUTPUT "^-.+ project-starter")
   endsection()
 endsection()
 
@@ -32,7 +35,7 @@ section("it should redownload the package with submodules")
   section("it should download the submodules")
     assert_execute_process(
       COMMAND ${GIT_EXECUTABLE} -C .cdeps/pkg/src submodule status --recursive
-      OUTPUT "^ .+ project-starter")
+      EXPECT_OUTPUT "^.+ project-starter")
   endsection()
 endsection()
 
