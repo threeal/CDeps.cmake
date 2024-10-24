@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
@@ -28,7 +29,7 @@ section("it should build a package located in the root directory")
   section("it should build the correct project")
     assert_execute_process(
       COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "PROJECT_NAME:STRING=root")
+      EXPECT_OUTPUT "PROJECT_NAME:STRING=root")
   endsection()
 endsection()
 
@@ -43,7 +44,7 @@ section("it should build a package located in a subdirectory")
   section("it should rebuild the correct project")
     assert_execute_process(
       COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "PROJECT_NAME:STRING=subdir")
+      EXPECT_OUTPUT "PROJECT_NAME:STRING=subdir")
   endsection()
 endsection()
 

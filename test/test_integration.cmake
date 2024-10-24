@@ -1,5 +1,7 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake
-  RESULT_VARIABLE CDEPS_LIST_FILE)
+cmake_minimum_required(VERSION 3.21)
+
+include(Assertion)
+include(CDeps RESULT_VARIABLE CDEPS_LIST_FILE)
 
 file(REMOVE_RECURSE project)
 
@@ -14,7 +16,7 @@ endsection()
 section("it should fail to configure the build due to missing dependencies")
   assert_execute_process(
     COMMAND "${CMAKE_COMMAND}" -G "Unix Makefiles" -S project -B project/build
-    ERROR "Could not find a package configuration file")
+    EXPECT_ERROR "Could not find a package configuration file")
 endsection()
 
 section("it should regenerate the source code of the test project")
@@ -63,7 +65,7 @@ endsection()
 section("it should run the test project")
   assert_execute_process(
     COMMAND "${CMAKE_COMMAND}" --build project/build --target run
-    OUTPUT "1 1 2 3 5")
+    EXPECT_OUTPUT "1 1 2 3 5")
 endsection()
 
 file(REMOVE_RECURSE project)

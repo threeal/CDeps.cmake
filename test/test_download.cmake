@@ -1,6 +1,9 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+cmake_minimum_required(VERSION 3.21)
 
 find_package(Git REQUIRED QUIET)
+
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
@@ -26,7 +29,7 @@ section("it should download a package")
   section("it should download only the latest change")
     assert_execute_process(
       COMMAND ${GIT_EXECUTABLE} -C .cdeps/pkg/src rev-list --count HEAD
-      OUTPUT 1)
+      EXPECT_OUTPUT STREQUAL 1)
   endsection()
 endsection()
 
@@ -63,9 +66,8 @@ section("it should redownload the package because of an invalidated lock file")
 endsection()
 
 section("it should fail to redownload the package because of an invalid URL")
-  assert_fatal_error(
-    CALL cdeps_download_package pkg invalid.com invalid
-    MESSAGE "CDeps: Failed to execute process:")
+  assert_call(cdeps_download_package pkg invalid.com invalid
+    EXPECT_ERROR "^CDeps: Failed to execute process:")
 
   section("it should remove the lock file")
     assert(NOT EXISTS .cdeps/pkg/src.lock)

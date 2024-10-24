@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_DIR .cdeps)
 file(REMOVE_RECURSE .cdeps)
@@ -25,9 +26,8 @@ section("it should fail to rebuild the package "
   "due to an invalid default generator")
   block()
     set(CDEPS_BUILD_GENERATOR invalid)
-    assert_fatal_error(
-      CALL cdeps_build_package pkg
-      MESSAGE "CDeps: Failed to execute process:")
+    assert_call(cdeps_build_package pkg
+      EXPECT_ERROR "^CDeps: Failed to execute process:")
   endblock()
 
   section("it should remove the lock file")
@@ -48,8 +48,8 @@ section("it should rebuild the package with the default generator")
 
   section("it should rebuild with the correct generator")
     assert_execute_process(
-      COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "GENERATOR:STRING=Unix Makefiles")
+      COMMAND "${CMAKE_COMMAND}" -L -N .cdeps/pkg/build
+      EXPECT_OUTPUT "GENERATOR:STRING=Unix Makefiles")
   endsection()
 endsection()
 
@@ -57,9 +57,8 @@ section("it should fail to rebuild the package "
   "due to an invalid specified generator")
   block()
     set(CDEPS_BUILD_GENERATOR "Unix Makefiles")
-    assert_fatal_error(
-      CALL cdeps_build_package pkg GENERATOR invalid
-      MESSAGE "CDeps: Failed to execute process:")
+    assert_call(cdeps_build_package pkg GENERATOR invalid
+      EXPECT_ERROR "^CDeps: Failed to execute process:")
   endblock()
 
   section("it should remove the lock file")
@@ -80,8 +79,8 @@ section("it should rebuild the package with the specified generator")
 
   section("it should rebuild with the correct generator")
     assert_execute_process(
-      COMMAND ${CMAKE_COMMAND} -L -N .cdeps/pkg/build
-      OUTPUT "GENERATOR:STRING=Unix Makefiles")
+      COMMAND "${CMAKE_COMMAND}" -L -N .cdeps/pkg/build
+      EXPECT_OUTPUT "GENERATOR:STRING=Unix Makefiles")
   endsection()
 endsection()
 

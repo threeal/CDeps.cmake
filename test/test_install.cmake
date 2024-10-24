@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/CDeps.cmake)
+include(Assertion)
+include(CDeps)
 
 set(CDEPS_BUILD_GENERATOR "Unix Makefiles")
 
@@ -9,9 +10,8 @@ file(REMOVE_RECURSE .cdeps)
 
 section("it should fail to install a package "
   "because it has not been built")
-  assert_fatal_error(
-    CALL cdeps_install_package pkg
-    MESSAGE "CDeps: pkg must be built before installation")
+  assert_call(cdeps_install_package pkg
+    EXPECT_ERROR "^CDeps: pkg must be built before installation")
 endsection()
 
 file(WRITE .cdeps/pkg/src/CMakeLists.txt
@@ -51,10 +51,11 @@ section("it should install a package")
 
   section("it should install the correct targets")
     if(EXISTS .cdeps/pkg/install/bin/main)
-      assert_execute_process(.cdeps/pkg/install/bin/main OUTPUT "Hello World!")
+      assert_execute_process(.cdeps/pkg/install/bin/main
+        EXPECT_OUTPUT STREQUAL "Hello World!")
     elseif(EXISTS .cdeps/pkg/install/bin/main.exe)
-      assert_execute_process(
-        .cdeps/pkg/install/bin/main.exe OUTPUT "Hello World!")
+      assert_execute_process(.cdeps/pkg/install/bin/main.exe
+        EXPECT_OUTPUT STREQUAL "Hello World!")
     else()
       fail("expected path" .cdeps/pkg/install/bin/main "to exist")
     endif()
@@ -99,9 +100,8 @@ section("it should fail to reinstall the package "
   file(WRITE .cdeps/pkg/build/cmake_install.cmake corrupted)
   file(APPEND .cdeps/pkg/install.lock " invalidated")
 
-  assert_fatal_error(
-    CALL cdeps_install_package pkg
-    MESSAGE "CDeps: Failed to execute process:")
+  assert_call(cdeps_install_package pkg
+    EXPECT_ERROR "^CDeps: Failed to execute process:")
 
   section("it should remove the lock file")
     assert(NOT EXISTS .cdeps/pkg/install.lock)
